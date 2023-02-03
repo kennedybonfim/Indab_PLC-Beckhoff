@@ -1,0 +1,203 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="CondicoesIniciais" Id="{43e2cee4-235c-49d5-88f2-6446a176e365}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM CondicoesIniciais
+VAR
+		
+	PassoCondicoesIniciais			: INT;
+	
+	EixoX_MoveAbsoluteOrigem		: MC_MoveAbsolute;
+	EixoY_MoveAbsoluteOrigem		: MC_MoveAbsolute;
+	
+	Flag_EixoX_PosicaoOK			: BOOL;
+	Flag_EixoY_PosicaoOK			: BOOL;
+	
+	DelayTest						: TON;
+	
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*=====================		CONDIÇÕES INICIAIS		======================*)	
+
+//Condição de Bloqueio da Máquina de Estados - Mesa Index FWD
+IF (Alarmes.AlarmeGrave
+	OR MaquinaLigada
+	OR MaquinaModoManual
+	OR NOT IhmBt_CondIniciais
+	) THEN
+	PassoCondicoesIniciais := 1000;
+	EixoX_MoveAbsoluteOrigem(	Axis:= EixoX, Execute:= FALSE);
+	EixoY_MoveAbsoluteOrigem(	Axis:= EixoY, Execute:= FALSE);
+	Flag_EixoX_PosicaoOK := FALSE;
+	Flag_EixoY_PosicaoOK := FALSE;
+
+END_IF
+CASE PassoCondicoesIniciais OF
+
+	//Passo 0 - Inicialização
+	0: PassoCondicoesIniciais := 10;
+	
+	//Passo 10 - Condição para iniciar Rotina de Condições Iniciais
+	10: IF (IhmBt_CondIniciais) THEN
+			PassoCondicoesIniciais := 20;
+		END_IF
+		
+	//Passo 20 - Recuar Cilindro Principal
+	20: LigarValvulaY6:= FALSE;
+		LigarValvulaY9 := FALSE;
+	IF (ReguaPotenciometricaSinal > 500 AND ReguaPotenciometricaSinal < 15000) THEN
+		DelayTest(IN := TRUE, PT := T#5S);
+		IF (DelayTest.Q) THEN
+			PassoCondicoesIniciais := 30;
+		END_IF
+	END_IF
+
+	//Passo 30 - Posicionar Servos X e Y - Ponto Inicial de Soldagem
+	30: EixoX_MoveAbsoluteOrigem(	Axis := EixoX, 
+									Execute := TRUE,
+									Position := PosicaoOrigemX,
+									Velocity := 1000
+									//Acceleration:= 15000,
+									//Deceleration:= 15000
+									);
+		IF (EixoX_MoveAbsoluteOrigem.Done) THEN
+			Flag_EixoX_PosicaoOK := TRUE;	
+		END_IF
+		
+		EixoY_MoveAbsoluteOrigem(	Axis := EixoY, 
+									Execute := TRUE,
+									Position := PosicaoOrigemY,
+									Velocity := 1000
+									//Acceleration:= 15000,
+									//Deceleration:= 15000
+									);
+		IF (EixoY_MoveAbsoluteOrigem.Done) THEN
+			Flag_EixoY_PosicaoOK := TRUE;	
+		END_IF
+		
+		IF (Flag_EixoX_PosicaoOK AND Flag_EixoY_PosicaoOK) THEN
+			PassoCondicoesIniciais := 40;	
+		END_IF
+		
+	//Passo 40 - Finalizar Movimentação - Servos X e Y
+	40: EixoX_MoveAbsoluteOrigem(	Axis:= EixoX, Execute:= FALSE);
+		EixoY_MoveAbsoluteOrigem(	Axis:= EixoY, Execute:= FALSE);
+		Flag_EixoX_PosicaoOK := FALSE;
+		Flag_EixoY_PosicaoOK := FALSE;
+		IhmBt_CondIniciais := FALSE;
+		PassoCondicoesIniciais := 1000;
+	
+	//Passo 1000 - Finalização
+	1000: 	IhmBt_CondIniciais := FALSE;
+			PassoCondicoesIniciais := 0;
+			
+
+END_CASE
+
+(*CASE PassoCondicoesIniciais OF
+
+	//Passo 0 - Inicialização
+	0: PassoCondicoesIniciais := 10;
+	
+	//Passo 10 - Condição para iniciar Rotina de Condições Iniciais
+	10: //IF InComandoPedal THEN
+			PassoCondicoesIniciais := 30;
+		//END_IF
+	
+	//Passo 20 - Máquina de Solda em Condições Iniciais
+	20:	
+		PassoCondicoesIniciais := 30;
+	
+	//Passo 30 - Robô em Condições Iniciais
+	30: 
+		PassoCondicoesIniciais := 40;
+		
+	//Passo 40 - Servos X e Y em Condições Iniciais
+	40:
+		PassoCondicoesIniciais := 50;
+		
+	//Passo 50 - Mesa Index em Condições Iniciais
+	50: 
+		PassoCondicoesIniciais := 60;
+		
+	//Passo 60 - Câmera em Condições Iniciais
+	60: 
+		PassoCondicoesIniciais := 70;
+		
+	//Passo 70 - 
+	70: 
+		PassoCondicoesIniciais := 80;
+	
+	//Passo 80 - Sinalizar Conclusão da Rotina
+	80: 
+		PassoCondicoesIniciais := 1000;
+	
+	//Passo 1000 - Finalização
+	1000: PassoCondicoesIniciais := 0;
+
+END_CASE*)
+
+(*========================================================================*)
+]]></ST>
+    </Implementation>
+    <LineIds Name="CondicoesIniciais">
+      <LineId Id="361" Count="3" />
+      <LineId Id="684" Count="0" />
+      <LineId Id="1351" Count="1" />
+      <LineId Id="676" Count="0" />
+      <LineId Id="365" Count="0" />
+      <LineId Id="1348" Count="2" />
+      <LineId Id="1347" Count="0" />
+      <LineId Id="683" Count="0" />
+      <LineId Id="367" Count="0" />
+      <LineId Id="1098" Count="5" />
+      <LineId Id="1107" Count="0" />
+      <LineId Id="1139" Count="1" />
+      <LineId Id="1185" Count="1" />
+      <LineId Id="1188" Count="0" />
+      <LineId Id="1198" Count="0" />
+      <LineId Id="1189" Count="0" />
+      <LineId Id="1193" Count="3" />
+      <LineId Id="1187" Count="0" />
+      <LineId Id="1141" Count="0" />
+      <LineId Id="1134" Count="0" />
+      <LineId Id="1146" Count="30" />
+      <LineId Id="1333" Count="0" />
+      <LineId Id="1142" Count="0" />
+      <LineId Id="1135" Count="2" />
+      <LineId Id="1332" Count="0" />
+      <LineId Id="1330" Count="0" />
+      <LineId Id="1138" Count="0" />
+      <LineId Id="1097" Count="0" />
+      <LineId Id="368" Count="6" />
+      <LineId Id="1077" Count="1" />
+      <LineId Id="375" Count="3" />
+      <LineId Id="1080" Count="0" />
+      <LineId Id="381" Count="0" />
+      <LineId Id="360" Count="0" />
+      <LineId Id="359" Count="0" />
+      <LineId Id="673" Count="0" />
+      <LineId Id="675" Count="0" />
+      <LineId Id="672" Count="0" />
+      <LineId Id="502" Count="0" />
+      <LineId Id="1082" Count="0" />
+      <LineId Id="503" Count="0" />
+      <LineId Id="607" Count="1" />
+      <LineId Id="1083" Count="0" />
+      <LineId Id="610" Count="0" />
+      <LineId Id="508" Count="1" />
+      <LineId Id="1084" Count="0" />
+      <LineId Id="611" Count="0" />
+      <LineId Id="613" Count="0" />
+      <LineId Id="617" Count="0" />
+      <LineId Id="1085" Count="0" />
+      <LineId Id="511" Count="0" />
+      <LineId Id="518" Count="0" />
+      <LineId Id="523" Count="0" />
+      <LineId Id="1086" Count="1" />
+      <LineId Id="524" Count="3" />
+      <LineId Id="334" Count="0" />
+      <LineId Id="301" Count="0" />
+      <LineId Id="1214" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

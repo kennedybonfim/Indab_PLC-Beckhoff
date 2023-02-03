@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="MAIN" Id="{f0885165-ebe3-40e7-bb0a-fe0b5c381fd6}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+		
+	SafetyPLCIn 	AT %I*:BYTE;
+	SafetyPLCOut 	AT %Q*:BYTE;
+	
+	sUrlAddressCamera : STRING;
+
+	writeData:FB_WritePersistentData;
+	t1:TON;
+	bSavePersistent: BOOL;
+	
+	timer_login	: TON;
+	
+	Timer_Blink_1hz_1	: TON;
+	Timer_Blink_1hz_2	: TON;
+	
+	b_contador		: BOOL;
+	int_contador_10		: INT;
+	
+	
+	PassoBtLigarDesligar	: INT;
+	PassoBtReset			: INT;
+	PassoMaquina			: INT;
+	
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*=====================		ROTINAS EXECUTADAS		======================*)
+
+Main_Receita();
+CondicoesIniciais();
+Alarmes();
+InterfaceIOs();
+Inversores();
+Valvulas();
+ReguaPotenciometrica();
+Servos();
+Robo();
+Camera();
+MaquinaSolda();
+IHM();
+Sinalizadores();
+
+(*=================		INTERFACE CÂMERA SICK		======================*)
+
+sUrlAddressCamera := 'http://192.168.10.20/';
+
+(*=====================		ROTINA PRINCIPAL		======================*)	
+
+//Condição de Bloqueio da Máquina de Estados - Mesa Index FWD
+IF (Alarmes.AlarmeGrave
+	//OR Alarmes.AlarmeMedio
+	//OR Alarmes.AlarmeLeve
+	OR NOT MaquinaLigada
+	OR NOT MaquinaModoAuto
+	) THEN
+	PassoMaquina := 1000;
+	MaquinaLigada := FALSE;
+	Flag_Maquina_MesaIndex := FALSE;
+	Flag_Maquina_ServosXY := FALSE;	
+	Flag_Maquina_Robo := FALSE;
+	Flag_Maquina_EsteiraSaida := FALSE;
+END_IF
+
+CASE PassoMaquina OF
+
+	//Passo 0 - Inicialização
+	0: PassoMaquina := 10;
+	
+	//Passo 10 - Verificar condições iniciais
+	10: PassoMaquina := 20;
+	
+	//Passo 20 - Comando para iniciar ciclo 
+	20: //IF InComandoPedal THEN
+			PassoMaquina := 30;
+		//END_IF
+	
+	//Passo 30 - Dar Passo na Mesa Index
+	30: Flag_Maquina_MesaIndex := TRUE;
+		PassoMaquina := 40;
+		
+	//Passo 40 - Verificar Conclusão do Movimento da Mesa Index
+	40: IF Flag_MesaIndex_Maquina THEN
+			Flag_MesaIndex_Maquina := FALSE;
+			PassoMaquina := 50;
+		END_IF
+		
+	//Passo 50 - Liberar Servos XY
+	50: Flag_Maquina_ServosXY := TRUE;
+		PassoMaquina := 60;
+		
+	//Passo 60 - Liberar Ação do Robô
+	60: Flag_Maquina_Robo := TRUE;
+		PassoMaquina := 70;
+		
+	//Passo 70 - Verificar Conclusão da Rotina dos Servos e da Máquina de Solda
+	70: IF Flag_ServosXY_Maquina THEN
+			Flag_ServosXY_Maquina := FALSE;
+			PassoMaquina := 80;
+		END_IF
+	
+	//Passo 80 - Verificar Conclusão da Rotina Avaliação da Peça (Robô e Câmera)
+	80: IF Flag_Robo_Maquina THEN
+			Flag_Robo_Maquina := FALSE;
+			PassoMaquina := 1000;
+		END_IF
+	
+	//Passo 1000 - Finalização
+	1000: PassoMaquina := 0;
+
+END_CASE
+
+(*========================================================================*)]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="1082" Count="7" />
+      <LineId Id="1191" Count="0" />
+      <LineId Id="1090" Count="75" />
+      <LineId Id="301" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

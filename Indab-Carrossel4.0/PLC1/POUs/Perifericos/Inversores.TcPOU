@@ -1,0 +1,467 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="Inversores" Id="{9cc97f29-a3ae-4037-90a4-ce9c90bf4f32}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Inversores
+VAR
+
+(*=========================		INVERSORES		==========================*)	
+
+	PassoMesaIndexAutomatico		: INT;
+	PassoMesaIndexCiclo				: INT;
+	PassoMesaIndexFwd				: INT;
+	PassoMesaIndexBwd				: INT;
+	PassoEsteiraSaidaAutomatico		: INT;
+	PassoEsteiraSaidaFwd			: INT;
+	PassoEsteiraSaidaBwd			: INT;
+
+	TON_DelayParadaAuto				: TON;
+	TON_DelayParadaCiclo			: TON;
+	
+	DelayParada						: TIME;
+	
+(*========================================================================*)
+
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*==============		SET Velocidade da Mesa Index		==============*)
+
+FrequenciaMesaIndex := (INT_TO_REAL(IhmEscr_MesaIndex_Frequencia)/60)*(32767);
+DelayParada	:= REAL_TO_TIME(IhmEscr_MesaIndex_DelayParada*1000);
+
+(*=================		INVERSOR 1 - Mesa Index		======================*)
+
+(*======================		Modo Automático		======================*)
+
+//Condição de Bloqueio da Máquina de Estados - Mesa Index Automático
+IF (Alarmes.AlarmeGrave
+	//OR Alarmes.AlarmeMedio
+	//OR Alarmes.AlarmeLeve
+	OR NOT MaquinaLigada
+	OR NOT MaquinaModoAuto
+	OR NOT((ReguaPotenciometricaPosicao > ReguaPotenciometrica_Recuada_LI) AND (ReguaPotenciometricaPosicao < ReguaPotenciometrica_Recuada_LS))
+	OR (NOT InSafety_CortinaLuz AND (PassoMesaIndexAutomatico > 13))
+	) THEN
+	PassoMesaIndexAutomatico := 1000;
+	TON_DelayParadaAuto(IN:=FALSE);
+	Flag_MesaIndex_Maquina := FALSE;
+	LigarMesaIndexAutomatico := FALSE;	
+END_IF
+
+CASE PassoMesaIndexAutomatico OF
+	
+	//Passo 0 - Inicialização	
+	0: PassoMesaIndexAutomatico := 10;
+	
+	//Passo 10 - Condição para Iniciar a Rotina Mesa Index (Sentido Normal - Automatico)
+	10: IF  (Flag_Maquina_MesaIndex) THEN
+			Flag_Maquina_MesaIndex := FALSE;
+			PassoMesaIndexAutomatico := 11;
+		END_IF
+
+	//Passo 11 - Barreira Livre - Início do Processo
+	11: IF  (InSafety_CortinaLuz) THEN
+			PassoMesaIndexAutomatico := 12;
+		END_IF
+		
+	//Passo 12 - Barreira Rompida - Posicionar Peça
+	12: IF  (NOT InSafety_CortinaLuz) THEN
+			PassoMesaIndexAutomatico := 13;
+		END_IF
+		
+	//Passo 13 - Barreira Livre - Iniciar Movimentação da Mesa
+	13: IF  (InSafety_CortinaLuz) THEN
+			PassoMesaIndexAutomatico := 14;
+		END_IF
+		
+	//Passo 14 - Movimentar Mesa Index
+	14: LigarMesaIndexAutomatico := TRUE;
+		
+		Flag_Maquina_MesaIndex := FALSE;//Fora de posição para efeito de testes
+	
+		PassoMesaIndexAutomatico := 20;
+
+	//Passo 20 - Aguardar Acionamento do Sensor de Posição 
+	20: IF  InSensorIndutivo07 THEN
+			PassoMesaIndexAutomatico := 30;	
+		END_IF
+	
+	//Passo 30 - Aguardar Desacionamento do Sensor de Posição 
+	30: IF  NOT InSensorIndutivo07 THEN
+			PassoMesaIndexAutomatico := 40;	
+		END_IF	
+
+	//Passo 40 - Condição para Desligar Mesa Index - Delay de Parada
+	40: TON_DelayParadaAuto(IN:=TRUE,PT:= DelayParada);
+		IF (TON_DelayParadaAuto.Q) THEN
+			TON_DelayParadaAuto(IN:=FALSE);
+			LigarMesaIndexAutomatico := FALSE;
+			PassoMesaIndexAutomatico := 50;
+		END_IF
+	
+	//Passo 50 - Sinalização da Conclusão do Movimento
+	50: Flag_MesaIndex_Maquina := TRUE;
+		PassoMesaIndexAutomatico := 1000;
+			
+	//Passo 1000 - Finalização
+	1000: PassoMesaIndexAutomatico := 0;
+	
+END_CASE
+
+(*========================================================================*)
+
+(*=========================		Modo Ciclo		==========================*)
+
+//Condição de Bloqueio da Máquina de Estados - Mesa Index Ciclo
+IF (Alarmes.AlarmeGrave 
+	OR NOT MaquinaModoManual
+	OR NOT InSafety_CortinaLuz
+	) THEN
+	PassoMesaIndexCiclo := 1000;
+	TON_DelayParadaCiclo(IN:=FALSE);
+	LigarMesaIndexCiclo := FALSE;
+END_IF
+
+CASE PassoMesaIndexCiclo OF
+	
+	//Passo 0 - Inicialização	
+	0: PassoMesaIndexCiclo := 10;
+	
+	//Passo 10 - Condição para Ligar Mesa Index (Sentido Normal - Ciclo)
+	10: IF  (IhmBt_MesaIndex_Ciclo) THEN
+			PassoMesaIndexCiclo := 20;
+		END_IF
+		
+	//Passo 20 - Aguardar o Botão Retorno do Botão
+	20: IF  (NOT IhmBt_MesaIndex_Ciclo) THEN
+			PassoMesaIndexCiclo := 30;
+		END_IF
+ 
+	//Passo 30 - Ligar Mesa Index
+	30: LigarMesaIndexCiclo := TRUE;
+		IF (InSensorIndutivo07) THEN
+			PassoMesaIndexCiclo := 40;	
+		END_IF
+		
+	//Passo 40 - Aguardar Desacionamento do Sensor de Posição 
+	40:	IF (NOT InSensorIndutivo07) THEN
+			PassoMesaIndexCiclo := 50;	
+		END_IF
+
+	//Passo 50 - Condição para Desligar Mesa Index 
+	50: TON_DelayParadaCiclo(IN:=TRUE,PT:= DelayParada);
+		IF (TON_DelayParadaCiclo.Q) THEN
+			TON_DelayParadaCiclo(IN:=FALSE);
+			LigarMesaIndexCiclo := FALSE;
+			PassoMesaIndexCiclo := 1000;
+		END_IF
+			
+	//Passo 1000 - Finalização
+	1000: PassoMesaIndexCiclo := 0;
+	
+END_CASE
+
+(*========================================================================*)
+
+(*======================		Modo Manual		==========================*)
+
+//Condição de Bloqueio da Máquina de Estados - Mesa Index FWD
+IF (Alarmes.AlarmeGrave
+	OR NOT MaquinaModoManual
+	OR(NOT IhmBt_MesaIndex_LigarDesligar AND IhmBt_MesaIndex_Sentido)
+	OR IhmBt_MesaIndex_Ciclo
+	OR NOT InSafety_CortinaLuz
+	) THEN
+	PassoMesaIndexFwd := 1000;
+	LigarMesaIndexFwd := FALSE;
+	IhmBt_MesaIndex_LigarDesligar := FALSE;
+END_IF
+
+CASE PassoMesaIndexFwd OF
+	
+	//Passo 0 - Inicialização	
+	0: PassoMesaIndexFwd := 10;
+	
+	//Passo 10 - Condição para Ligar Mesa Index (Sentido Normal - Forward)
+	10: IF (NOT IhmBt_MesaIndex_Sentido AND IhmBt_MesaIndex_LigarDesligar) THEN
+			LigarMesaIndexFwd := TRUE;
+			PassoMesaIndexFwd := 20;
+		END_IF
+
+	//Passo 20 - Condição para Desligar Mesa Index 
+	20: IF (NOT IhmBt_MesaIndex_LigarDesligar) THEN
+			LigarMesaIndexFwd := FALSE;
+			PassoMesaIndexFwd := 1000;	
+		END_IF
+	
+	//Passo 1000 - Finalização
+	1000: PassoMesaIndexFwd := 0;
+	
+END_CASE
+
+//Condição de Bloqueio da Máquina de Estados - Mesa Index REV
+IF (Alarmes.AlarmeGrave
+	//OR NOT MaquinaModoManual
+	//OR(NOT IhmBt_MesaIndex_LigarDesligar AND NOT IhmBt_MesaIndex_Sentido)
+	OR IhmBt_MesaIndex_Ciclo
+	) THEN
+	PassoMesaIndexBwd := 1000;
+	LigarMesaIndexBwd := FALSE;
+	IhmBt_MesaIndex_LigarDesligar := FALSE;
+END_IF
+
+CASE PassoMesaIndexBwd OF
+	
+	//Passo 0 - Inicialização	
+	0: PassoMesaIndexBwd := 10;
+	
+	//Passo 10 - Condição para Ligar Mesa Index (Sentido Reverso - Reverse)
+	10: IF (IhmBt_MesaIndex_Sentido AND IhmBt_MesaIndex_LigarDesligar) THEN
+			LigarMesaIndexBwd := TRUE;
+			PassoMesaIndexBwd := 20;
+		END_IF
+
+	//Passo 20 - Condição para Desligar Mesa Index 
+	20: IF (NOT IhmBt_MesaIndex_LigarDesligar) THEN
+			LigarMesaIndexBwd := FALSE;
+			PassoMesaIndexBwd := 1000;	
+		END_IF
+	
+	//Passo 1000 - Finalização
+	1000: PassoMesaIndexBwd := 0;
+	
+END_CASE
+
+(*=============		SET Velocidade da Esteira de Saída		==============*)
+
+FrequenciaEsteiraSaida := (INT_TO_REAL(IhmEscr_EsteiraSaida_Frequencia)/60)*(32767);
+
+(*=============		INVERSOR 2 - Esteira de Saída		==================*)
+
+(*======================		Modo Automático		======================*)
+
+
+
+(*======================		Modo Manual		==========================*)
+
+//Condição de Bloqueio da Máquina de Estados - Esteira de Saída FWD
+IF (Alarmes.AlarmeGrave
+	OR NOT MaquinaModoManual
+	OR(NOT IhmBt_EsteiraSaida_LigarDesligar AND IhmBt_EsteiraSaida_Sentido)
+	) THEN
+	PassoEsteiraSaidaFwd := 1000;
+	LigarEsteiraSaidaFwd := FALSE;
+END_IF
+
+CASE PassoEsteiraSaidaFwd OF
+	
+	//Passo 0 - Inicialização	
+	0: PassoEsteiraSaidaFwd := 10;
+	
+	//Passo 10 - Condição para Ligar Esteira de Saída (Sentido Normal - Forward)
+	10: IF (NOT IhmBt_EsteiraSaida_Sentido AND IhmBt_EsteiraSaida_LigarDesligar) THEN
+			LigarEsteiraSaidaFwd := TRUE;
+			PassoEsteiraSaidaFwd := 20;
+		END_IF
+
+	//Passo 20 - Condição para Desligar Esteira de Saída 
+	20: IF (NOT IhmBt_EsteiraSaida_LigarDesligar) THEN
+			LigarEsteiraSaidaFwd := FALSE;
+			PassoEsteiraSaidaFwd := 1000;	
+		END_IF
+	
+	//Passo 1000 - Finalização
+	1000: PassoEsteiraSaidaFwd := 0;
+	
+END_CASE
+
+//Condição de Bloqueio da Máquina de Estados - Esteira de Saída REV
+IF (Alarmes.AlarmeGrave
+	//OR NOT MaquinaModoManual
+	OR(NOT IhmBt_EsteiraSaida_LigarDesligar AND NOT IhmBt_EsteiraSaida_Sentido)
+	) THEN
+	PassoEsteiraSaidaBwd := 1000;
+	LigarEsteiraSaidaBwd := FALSE;		
+END_IF
+
+CASE PassoEsteiraSaidaBwd OF
+	
+	//Passo 0 - Inicialização	
+	0: PassoEsteiraSaidaBwd := 10;
+	
+	//Passo 10 - Condição para Ligar Mesa Index (Sentido Reverso - Reverse)
+	10: IF (IhmBt_EsteiraSaida_Sentido AND IhmBt_EsteiraSaida_LigarDesligar) THEN
+			LigarEsteiraSaidaBwd := TRUE;
+			PassoEsteiraSaidaBwd := 20;
+		END_IF
+
+	//Passo 20 - Condição para Desligar Mesa Index 
+	20: IF (NOT IhmBt_EsteiraSaida_LigarDesligar) THEN
+			LigarEsteiraSaidaBwd := FALSE;
+			PassoEsteiraSaidaBwd := 1000;	
+		END_IF
+	
+	//Passo 1000 - Finalização
+	1000: PassoEsteiraSaidaBwd := 0;
+	
+END_CASE
+
+(*========================================================================*)
+
+(*=====================		INVERSORES	- SAÍDAS	======================*)	
+
+//Inversor 1 - Mesa Index
+IF (LigarMesaIndexFwd OR LigarMesaIndexCiclo OR LigarMesaIndexAutomatico) THEN
+	OutSentidoGiroMesaIndex := FALSE;
+	OutLigarMesaIndex := TRUE;
+ELSIF (LigarMesaIndexBwd) THEN
+	OutSentidoGiroMesaIndex := TRUE;
+	OutLigarMesaIndex := TRUE;
+ELSE
+	OutSentidoGiroMesaIndex := FALSE;
+	OutLigarMesaIndex := FALSE;
+END_IF
+
+//Inversor 2 - Esteira de Saída
+IF (LigarEsteiraSaidaFwd) THEN
+	OutSentidoGiroEsteiraSaida := FALSE;
+	OutLigarEsteiraSaida := TRUE;
+ELSIF (LigarEsteiraSaidaBwd) THEN
+	OutSentidoGiroEsteiraSaida := TRUE;
+	OutLigarEsteiraSaida := TRUE;
+ELSE
+	OutSentidoGiroEsteiraSaida := FALSE;
+	OutLigarEsteiraSaida := FALSE;
+END_IF
+
+(*========================================================================*)]]></ST>
+    </Implementation>
+    <LineIds Name="Inversores">
+      <LineId Id="314" Count="0" />
+      <LineId Id="456" Count="1" />
+      <LineId Id="953" Count="0" />
+      <LineId Id="313" Count="0" />
+      <LineId Id="254" Count="0" />
+      <LineId Id="459" Count="4" />
+      <LineId Id="683" Count="0" />
+      <LineId Id="840" Count="0" />
+      <LineId Id="684" Count="0" />
+      <LineId Id="732" Count="0" />
+      <LineId Id="947" Count="0" />
+      <LineId Id="685" Count="0" />
+      <LineId Id="682" Count="0" />
+      <LineId Id="464" Count="0" />
+      <LineId Id="923" Count="0" />
+      <LineId Id="862" Count="0" />
+      <LineId Id="465" Count="8" />
+      <LineId Id="859" Count="1" />
+      <LineId Id="819" Count="0" />
+      <LineId Id="478" Count="0" />
+      <LineId Id="698" Count="0" />
+      <LineId Id="700" Count="3" />
+      <LineId Id="699" Count="0" />
+      <LineId Id="628" Count="1" />
+      <LineId Id="632" Count="2" />
+      <LineId Id="636" Count="1" />
+      <LineId Id="649" Count="0" />
+      <LineId Id="635" Count="0" />
+      <LineId Id="650" Count="0" />
+      <LineId Id="652" Count="1" />
+      <LineId Id="821" Count="2" />
+      <LineId Id="656" Count="0" />
+      <LineId Id="479" Count="4" />
+      <LineId Id="712" Count="0" />
+      <LineId Id="715" Count="2" />
+      <LineId Id="714" Count="0" />
+      <LineId Id="484" Count="1" />
+      <LineId Id="705" Count="1" />
+      <LineId Id="486" Count="1" />
+      <LineId Id="489" Count="1" />
+      <LineId Id="718" Count="0" />
+      <LineId Id="720" Count="0" />
+      <LineId Id="719" Count="0" />
+      <LineId Id="728" Count="0" />
+      <LineId Id="491" Count="3" />
+      <LineId Id="458" Count="0" />
+      <LineId Id="497" Count="0" />
+      <LineId Id="496" Count="0" />
+      <LineId Id="498" Count="0" />
+      <LineId Id="389" Count="0" />
+      <LineId Id="686" Count="0" />
+      <LineId Id="689" Count="1" />
+      <LineId Id="733" Count="0" />
+      <LineId Id="693" Count="2" />
+      <LineId Id="778" Count="0" />
+      <LineId Id="924" Count="0" />
+      <LineId Id="687" Count="0" />
+      <LineId Id="403" Count="6" />
+      <LineId Id="435" Count="0" />
+      <LineId Id="412" Count="1" />
+      <LineId Id="502" Count="1" />
+      <LineId Id="505" Count="1" />
+      <LineId Id="504" Count="0" />
+      <LineId Id="507" Count="0" />
+      <LineId Id="414" Count="0" />
+      <LineId Id="510" Count="0" />
+      <LineId Id="512" Count="0" />
+      <LineId Id="514" Count="1" />
+      <LineId Id="511" Count="0" />
+      <LineId Id="415" Count="1" />
+      <LineId Id="418" Count="1" />
+      <LineId Id="426" Count="2" />
+      <LineId Id="596" Count="2" />
+      <LineId Id="438" Count="0" />
+      <LineId Id="420" Count="0" />
+      <LineId Id="424" Count="0" />
+      <LineId Id="421" Count="1" />
+      <LineId Id="927" Count="0" />
+      <LineId Id="396" Count="0" />
+      <LineId Id="500" Count="0" />
+      <LineId Id="499" Count="0" />
+      <LineId Id="560" Count="0" />
+      <LineId Id="391" Count="0" />
+      <LineId Id="255" Count="2" />
+      <LineId Id="734" Count="0" />
+      <LineId Id="729" Count="1" />
+      <LineId Id="795" Count="0" />
+      <LineId Id="731" Count="0" />
+      <LineId Id="258" Count="1" />
+      <LineId Id="816" Count="0" />
+      <LineId Id="260" Count="20" />
+      <LineId Id="928" Count="0" />
+      <LineId Id="282" Count="2" />
+      <LineId Id="737" Count="3" />
+      <LineId Id="736" Count="0" />
+      <LineId Id="286" Count="1" />
+      <LineId Id="815" Count="0" />
+      <LineId Id="288" Count="22" />
+      <LineId Id="373" Count="1" />
+      <LineId Id="454" Count="0" />
+      <LineId Id="543" Count="0" />
+      <LineId Id="519" Count="0" />
+      <LineId Id="518" Count="0" />
+      <LineId Id="523" Count="0" />
+      <LineId Id="522" Count="0" />
+      <LineId Id="841" Count="0" />
+      <LineId Id="521" Count="0" />
+      <LineId Id="169" Count="0" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="170" Count="1" />
+      <LineId Id="747" Count="2" />
+      <LineId Id="751" Count="0" />
+      <LineId Id="173" Count="10" />
+      <LineId Id="185" Count="5" />
+      <LineId Id="192" Count="9" />
+      <LineId Id="758" Count="1" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="760" Count="0" />
+      <LineId Id="203" Count="11" />
+      <LineId Id="216" Count="4" />
+      <LineId Id="222" Count="6" />
+      <LineId Id="168" Count="0" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="155" Count="0" />
+      <LineId Id="880" Count="26" />
+      <LineId Id="879" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

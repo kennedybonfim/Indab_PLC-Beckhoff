@@ -1,0 +1,274 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="IHM" Id="{c023c45d-cd98-427a-aae9-5d18b9d7be91}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM IHM
+VAR
+		
+	SafetyPLCIn 	AT %I*:BYTE;
+	SafetyPLCOut 	AT %Q*:BYTE;
+	
+	sUrlAddressCamera : STRING;
+
+	writeData:FB_WritePersistentData;
+	t1:TON;
+	bSavePersistent: BOOL;
+	
+	timer_login	: TON;
+	
+	Timer_Blink_1hz_1	: TON;
+	Timer_Blink_1hz_2	: TON;
+	
+	b_contador		: BOOL;
+	int_contador_10		: INT;
+	
+	
+	PassoBtLigarDesligar	: INT;
+	PassoBtReset			: INT;
+	PassoMaquina			: INT;
+	
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*=====================		STATUS DA MÁQUINA		======================*)
+
+//Máquina em Alarme
+IF (Alarmes.AlarmeGrave
+	)THEN	
+	MaquinaAlarme := TRUE;
+ELSE
+	MaquinaAlarme := FALSE;
+END_IF	
+
+(*=====================		LÓGICA DOS BOTÕES		======================*)
+
+(*=====================		LIGAR E DESLIGAR		======================*)
+
+//Condição de Bloqueio da Máquina de Estados - Botões Ligar e Desligar
+IF (Alarmes.AlarmeGrave
+	//OR Alarmes.AlarmeMedio
+	//OR Alarmes.AlarmeLeve
+	OR MaquinaModoManual
+	) THEN
+	PassoBtLigarDesligar := 1000;
+	IhmBt_Desligar := TRUE;
+	IhmBt_Ligar := FALSE;
+	Flag_CondicoesIniciais := TRUE;
+END_IF
+
+// Máquina de Estados - Botões Ligar e Desligar
+CASE PassoBtLigarDesligar OF
+
+	//Passo 0 - Inicialização
+	0: PassoBtLigarDesligar := 10;
+	
+	//Passo 10 - Botão Ligar
+	10: IF IhmBt_Ligar THEN
+			MaquinaLigada := TRUE;
+			PassoBtLigarDesligar := 20;
+			IhmBt_Ligar := TRUE;
+			IhmBt_Desligar := FALSE;
+		ELSIF NOT IhmBt_Ligar THEN
+			IhmBt_Desligar := TRUE;
+		END_IF
+	
+	//Passo 20 - Botão Desligar
+	20: IF IhmBt_Desligar THEN
+			MaquinaLigada := FALSE;
+			PassoBtLigarDesligar := 1000;
+			IhmBt_Ligar := FALSE;
+			IhmBt_Desligar := TRUE;
+		ELSIF NOT IhmBt_Ligar THEN
+			IhmBt_Ligar := TRUE;
+		END_IF
+	
+	//Passo 1000 - Finalização
+	1000: PassoBtLigarDesligar := 0;
+
+END_CASE
+
+(*==========================		RESET		==========================*)
+
+IF (InSolicitaReset OR IhmBt_Reset) THEN
+	Reset := TRUE;
+ELSE
+	Reset := FALSE;
+END_IF
+
+(*=====================		MODO MANUAL / AUTO		======================*)
+
+IF IhmBt_ManualAuto THEN
+	IhmBt_ManualAuto_Text := 'MANUAL';
+	IhmBt_ManualAuto_Color := TRUE;
+	MaquinaModoManual := TRUE;
+	MaquinaModoAuto := FALSE;
+ELSE
+	IhmBt_ManualAuto_Text := 'AUTO';
+	IhmBt_ManualAuto_Color := FALSE;
+	MaquinaModoManual := FALSE;
+	MaquinaModoAuto := TRUE;
+END_IF
+
+(*========================================================================*)
+
+
+(*========================================================================*)
+
+//				Hora do Sistema					\\
+	FB_HoraAtual (START := TRUE, TIMESTR => tempo);
+	FB_HoraAtual (START := FALSE);
+	TempoAtual := SYSTEMTIME_TO_DT (tempo);
+
+t1(IN:= NOT t1.Q, PT:=T#1M);	
+writeData(
+	NETID:='' , 
+	PORT:=851 , 
+	START:= t1.Q OR bSavePersistent, 
+	TMOUT:= T#10S, 
+	MODE:= , 
+	BUSY=> , 
+	ERR=> ,  
+	ERRID=> );	
+	
+	UserGroupName 	:= WSTRING_TO_STRING (visuelems.CurrentUserGroupName);
+	UserGroupId		:= (visuelems.CurrentUserGroupId);
+
+IF UserGroupId = 1 THEN
+	UserName := WSTRING_TO_STRING(VisuElems.CurrentUserName);
+	timer_login (in := FALSE);
+	
+ELSIF UserGroupId = 0 THEN
+	timer_login (in := TRUE, pt := T#1S);	
+	IF timer_login.Q THEN
+		UserName := '';
+		b_editar_receita := FALSE;
+	END_IF
+END_IF
+
+(*///////////////////////////////			BLINK 0.25 HZ		\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+IF IhmBt_Ligar THEN
+	Timer_Blink_1hz_1 (IN := TRUE, PT := T#2S);	
+END_IF
+
+IF Timer_Blink_1hz_1.Q THEN
+	Blink_1hz := TRUE;
+	Timer_Blink_1hz_2 (IN := TRUE, PT := T#2S);
+	IF Timer_Blink_1hz_2.Q THEN
+		Blink_1hz := FALSE;
+		Timer_Blink_1hz_1 (IN := FALSE);
+		Timer_Blink_1hz_2 (IN := FALSE);
+	END_IF
+END_IF
+
+	I2 := Blink_1hz;
+	
+	IF NOT b_contador AND Blink_1hz THEN
+		b_contador := TRUE;
+		Contador_Total := Contador_Total + 1;
+		Contador_Pecas_Boas := Contador_Pecas_Boas + 1;
+		int_contador_10 := int_contador_10 + 1;
+	END_IF
+	IF NOT Blink_1hz THEN
+		b_contador := FALSE;
+	END_IF
+	
+	IF int_contador_10 = 10 THEN
+		int_contador_10 := 0;
+		Contador_Pecas_Boas := Contador_Pecas_Boas - 1;
+		Contador_Refugo := Contador_Refugo + 1;
+	END_IF
+*)	
+	IF BT_ihm_zerar_contador THEN
+		BT_ihm_zerar_contador := FALSE;
+		Contador_Total := 0;
+		Contador_PecasAprovadas := 0;
+		Contador_PecasReprovadas := 0;
+	END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="IHM">
+      <LineId Id="210" Count="0" />
+      <LineId Id="1034" Count="0" />
+      <LineId Id="1028" Count="5" />
+      <LineId Id="835" Count="0" />
+      <LineId Id="1035" Count="1" />
+      <LineId Id="1038" Count="0" />
+      <LineId Id="1037" Count="0" />
+      <LineId Id="341" Count="0" />
+      <LineId Id="343" Count="1" />
+      <LineId Id="719" Count="0" />
+      <LineId Id="721" Count="0" />
+      <LineId Id="1045" Count="0" />
+      <LineId Id="720" Count="0" />
+      <LineId Id="345" Count="0" />
+      <LineId Id="773" Count="1" />
+      <LineId Id="733" Count="0" />
+      <LineId Id="347" Count="0" />
+      <LineId Id="734" Count="0" />
+      <LineId Id="263" Count="0" />
+      <LineId Id="339" Count="0" />
+      <LineId Id="265" Count="7" />
+      <LineId Id="276" Count="1" />
+      <LineId Id="282" Count="1" />
+      <LineId Id="273" Count="2" />
+      <LineId Id="260" Count="2" />
+      <LineId Id="279" Count="0" />
+      <LineId Id="278" Count="0" />
+      <LineId Id="280" Count="1" />
+      <LineId Id="246" Count="1" />
+      <LineId Id="253" Count="1" />
+      <LineId Id="241" Count="0" />
+      <LineId Id="240" Count="0" />
+      <LineId Id="1041" Count="0" />
+      <LineId Id="1040" Count="0" />
+      <LineId Id="736" Count="0" />
+      <LineId Id="848" Count="0" />
+      <LineId Id="845" Count="0" />
+      <LineId Id="850" Count="2" />
+      <LineId Id="1042" Count="1" />
+      <LineId Id="988" Count="0" />
+      <LineId Id="990" Count="2" />
+      <LineId Id="996" Count="1" />
+      <LineId Id="993" Count="0" />
+      <LineId Id="998" Count="2" />
+      <LineId Id="994" Count="0" />
+      <LineId Id="986" Count="0" />
+      <LineId Id="217" Count="0" />
+      <LineId Id="214" Count="0" />
+      <LineId Id="302" Count="0" />
+      <LineId Id="334" Count="0" />
+      <LineId Id="301" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="12" Count="3" />
+      <LineId Id="18" Count="9" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="83" Count="1" />
+      <LineId Id="86" Count="8" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="122" Count="1" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="205" Count="2" />
+      <LineId Id="129" Count="1" />
+      <LineId Id="132" Count="2" />
+      <LineId Id="136" Count="1" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="139" Count="1" />
+      <LineId Id="143" Count="0" />
+      <LineId Id="148" Count="0" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="144" Count="0" />
+      <LineId Id="150" Count="4" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="159" Count="0" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="162" Count="2" />
+      <LineId Id="166" Count="2" />
+      <LineId Id="165" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

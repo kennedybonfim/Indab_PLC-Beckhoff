@@ -1,0 +1,569 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <GVL Name="GVL" Id="{a583168d-642c-4df0-9824-929edb51f38f}">
+    <Declaration><![CDATA[VAR_GLOBAL
+(*========================================================================*)	
+
+	FB_HoraAtual	: NT_GetTime;
+	TempoAtual		: DT;
+	Tempo_Atual_UTC	: DT;
+	tempo			: TIMESTRUCT;
+	
+	MaquinaAlarme			: BOOL;
+	MaquinaLigada			: BOOL;
+	MaquinaModoManual		: BOOL;
+	MaquinaModoAuto			: BOOL;
+	Flag_CondicoesIniciais	: BOOL;
+	Reset					: BOOL;
+
+(*========================================================================*)
+
+(*===================		ENTRADAS DIGITAIS		======================*)
+	
+	InMaquinaSolda_FK		: BOOL;
+	InPinoCalha				: BOOL;
+	InReset					: BOOL;
+	InVermelho				: BOOL;
+	InAmarelo				: BOOL;
+	InVerde					: BOOL;
+	InPecaOK				: BOOL;
+	InSolda					: BOOL;
+	
+	//Sensores Fins de Curso
+	InFimCurso1				: BOOL;
+	InFimCurso2				: BOOL;
+	InFimCurso3				: BOOL;
+	InFimCurso4				: BOOL;
+
+	//Sensores Painel Pneumático
+	InPressostatoGeral		: BOOL;
+	InSensorSegValvY7 		: BOOL;
+	InSensorSegValvY8		: BOOL;
+	
+	//Sensores Indutivos
+	InSensorIndutivo01		: BOOL;
+	InSensorIndutivo02		: BOOL;
+	InSensorIndutivo03		: BOOL;
+	InSensorIndutivo04		: BOOL;
+	InSensorIndutivo05		: BOOL;
+	InSensorIndutivo06		: BOOL;
+	InSensorIndutivo07		: BOOL;
+	InSensorIndutivo08		: BOOL;
+	InSensorIndutivo09		: BOOL;
+	InSensorIndutivo10		: BOOL;
+	InSensorIndutivo11		: BOOL;
+	InSensorIndutivo12		: BOOL;
+	
+	//Comandos
+	InComandoX				: BOOL;
+	InComandoY				: BOOL;
+	InComandoZ				: BOOL;
+	InComando4				: BOOL;
+	InComando5				: BOOL;
+	InComando6				: BOOL;
+	InComandoX1				: BOOL;
+	InComandoX10			: BOOL;
+	InComandoX100			: BOOL;
+	InComandoStopC			: BOOL;
+	InComandoStopCN			: BOOL;
+	
+	InSinalFaltaFase		: BOOL;
+	InComandoPedal			: BOOL;
+	InSolicitaEntrada		: BOOL;
+	InSolicitaReset			: BOOL;
+	
+(*========================================================================*)
+
+(*=====================		SAÍDAS DIGITAIS		==========================*)
+
+	//Inversor 1 - Mesa Index
+	OutLigarMesaIndex 			: BOOL;
+	OutSentidoGiroMesaIndex 	: BOOL;
+	
+	//Inversor 2 - Esteira de Saída
+	OutLigarEsteiraSaida		: BOOL;
+	OutSentidoGiroEsteiraSaida	: BOOL;
+	
+	//Máquina de Solda
+	OutMaquinaSolda_BtReset		: BOOL;
+	OutMaquinaSolda_BtStart		: BOOL;
+	
+	OutMaquinaSolda_Receita_Bit1 : BOOL;
+	OutMaquinaSolda_Receita_Bit2 : BOOL;
+	OutMaquinaSolda_Receita_Bit3 : BOOL;
+	OutMaquinaSolda_Receita_Bit4 : BOOL;
+	OutMaquinaSolda_Receita_Bit5 : BOOL;
+	
+	//Válvulas
+	OutValvulaY1A				: BOOL;
+	OutValvulaY1R				: BOOL;
+	OutValvulaY2A				: BOOL;
+	OutValvulaY2R				: BOOL;
+	OutValvulaY3A				: BOOL;
+	OutValvulaY3R				: BOOL;
+	OutValvulaY4A				: BOOL;
+	OutValvulaY4R				: BOOL;
+	OutValvulaY5A				: BOOL;
+	OutValvulaY5R				: BOOL;
+	OutValvulaY6				: BOOL;
+	OutValvulaY7				: BOOL;
+	OutValvulaY8				: BOOL;
+	OutValvulaY9				: BOOL;
+	
+	//Sinalizadores Luminosos
+	OutSinalizadorComandoLigado	: BOOL;
+	OutSinalizadorBotoeiraHS1	: BOOL;
+	OutSinalizadorBotoeiraHS2	: BOOL;
+	
+	//Sinalizador Luminoso - Manivela Eletrônica
+	OutSinalizadorManivelaEletronica :BOOL;
+	
+(*========================================================================*)
+
+(*=========================		SAFETY PLC		==========================*)	
+
+	InSafety_CortinaLuz					: BOOL;
+	InSafety_BtEmergenciaMaquinaSolda	: BOOL;
+	InSafety_BtEmergenciaChiller		: BOOL;
+	InSafety_BtEmergenciaRobo			: BOOL;
+	InSafety_BtEmergenciaFrontal		: BOOL;
+	InSafety_ChPortaMaquinaSolda		: BOOL;
+	InSafety_ChPortaPainelPrincipal		: BOOL;
+	InSafety_ChPortaEsteira				: BOOL;
+	InSafety_ChPortaCamera				: BOOL;
+	InSafety_ChPortaFrontalInferior		: BOOL;
+	InSafety_ChPortaLateralEsquerdaFD	: BOOL;
+	InSafety_ChPortaLateralEsquerdaFE	: BOOL;
+	
+	OutSafety_LiberacaoSDV1				: BOOL;
+	OutSafety_ComandoSDV1				: BOOL;
+	OutSafety_LiberacaoSDV2				: BOOL;
+	OutSafety_ComandoSDV2				: BOOL;
+	OutSafety_ComandoINVMesaIndex		: BOOL;
+	OutSafety_ComandoINVEsteiraSaida	: BOOL;
+	OutSafety_Comando1Robo				: BOOL;
+	OutSafety_Comando2Robo				: BOOL;
+	OutSafety_ParadaMaquinaSolda		: BOOL;
+	OutSafety_SinalizacaoEmergencia		: BOOL;
+	OutSafety_Reserva1					: BOOL;
+	OutSafety_Reserva2					: BOOL;
+	
+	OutSafety_BtReset					: BOOL;
+	
+(*========================================================================*)
+
+(*==========================		FLAG's		==========================*)	
+
+	Flag_Maquina_MesaIndex			: BOOL;
+	Flag_MesaIndex_Maquina			: BOOL;
+	
+	Flag_Maquina_EsteiraSaida		: BOOL;
+	Flag_EsteiraSaida_Maquina		: BOOL;
+	
+	//Flag_Maquina_MaquinaSolda		: BOOL;
+	//Flag_MaquinaSolda_Maquina		: BOOL;
+	Flag_ServosXY_MaquinaSolda		: BOOL;
+	Flag_MaquinaSolda_ServosXY		: BOOL;
+	
+	Flag_Maquina_Robo				: BOOL;
+	Flag_Robo_Maquina				: BOOL;
+	
+	Flag_Robo_Camera				: BOOL;
+	Flag_Camera_Robo				: BOOL;
+	
+	Flag_Maquina_ServosXY			: BOOL;
+	Flag_ServosXY_Maquina			: BOOL;
+
+(*========================================================================*)
+
+(*=====================		MÁQUINA DE SOLDA		======================*)	
+
+	LigarMaquinaSoldaManual			: BOOL;
+	LigarMaquinaSoldaAuto			: BOOL;
+
+(*========================================================================*)
+
+(*=========================		CÂMERA SICK		==========================*)	
+
+ Camera_Trigger					: BOOL;
+ Camera_ChangeJob				: BOOL;
+ Camera_SetJob					: BYTE;
+ 
+ Camera_JobResult				: BOOL;
+ Camera_JobCompleted			: BOOL;
+ Camera_JobID					: BYTE;
+ 
+ PecaAprovada					: BOOL;
+ 
+ Camera_TargetJob				: ARRAY[0..5] OF INT;
+ Camera_indexJob				: INT;
+ 
+(*========================================================================*)
+
+(*=========================		ROBÔ YASKAWA	==========================*)	
+
+	Robot_CallMasterJob			: BOOL;
+	Robot_ServoOn				: BOOL;
+	Robot_ServoOff				: BOOL;
+	Robot_ExtStart				: BOOL;
+	Robot_ResetAlarm			: BOOL;
+	
+	Robot_HomePosition			: BOOL;
+	Robot_TopMasterJob			: BOOL;
+	Robot_AlarmStatus			: BOOL;
+	
+	
+	Robot_IniciarCiclo			: BOOL;
+	Robot_JobCompleted			: BOOL;
+	Robot_JobCamera				: BOOL;
+	
+	Robot_NotSafetyPosition		: BOOL;
+	
+	Robot_Peca					: BOOL;
+	Robot_Foto1					: BOOL;
+	Robot_Foto2					: BOOL;
+
+(*========================================================================*)
+
+(*======================		SERVO MOTORES		======================*)	
+
+	EixoX 							: AXIS_REF;
+	EixoX_Energizado				: BOOL;
+	
+	EixoY 							: AXIS_REF;
+	EixoY_Energizado				: BOOL;
+
+(*========================================================================*)
+
+(*=========================		INVERSORES		==========================*)	
+
+	LigarMesaIndexAutomatico	: BOOL;
+	LigarMesaIndexCiclo			: BOOL;
+	LigarMesaIndexFwd			: BOOL;
+	LigarMesaIndexBwd	 		: BOOL;
+	LigarEsteiraSaidaFwd		: BOOL;
+	LigarEsteiraSaidaBwd		: BOOL;
+	
+	FrequenciaMesaIndex			: REAL;
+	FrequenciaEsteiraSaida		: REAL;
+	
+(*========================================================================*)
+	
+(*=========================		VÁLVULAS		==========================*)	
+
+	AvancarValvulaY1			: BOOL;
+	AvancarValvulaY2			: BOOL;
+	AvancarValvulaY3			: BOOL;
+	AvancarValvulaY4			: BOOL;
+	AvancarValvulaY5			: BOOL;
+	
+	LigarValvulaY6				: BOOL;
+	LigarValvulaY7				: BOOL;
+	LigarValvulaY8				: BOOL;
+	LigarValvulaY9				: BOOL;
+	
+	ValvulaProporcional			: REAL;
+	
+(*========================================================================*)
+
+(*======================		ENTRADAS IHM		======================*)
+
+	database_read					: ARRAY[0..MAX_CSV_ROWS, 0..MAX_CSV_COLUMNS ] OF STRING(MAX_CSV_FIELD_LENGTH);(* Target PLC database *)
+	Simbolo_Atualizacao				: BOOL;
+
+	b_selecionar_receita			: BOOL;
+	b_deletar_receita				: BOOL;
+	b_editar_receita				: BOOL;
+	b_executar_receita				: BOOL;
+	b_salvar_receita				: BOOL;
+	b_cancelar_receita				: BOOL;
+	b_criar_receita					: BOOL;
+	bRead							: BOOL;
+	bWrite							: BOOL;
+	
+(*======================		TELA RECEITA		======================*)
+
+	//IhmEscr_Receita_MaquinaSolda		: INT;
+
+(*======================		TELA MANUAL 1		======================*)
+	//Controle da Máquina
+	IhmBt_ManualAuto					: BOOL;
+	IhmBt_ManualAuto_Text				: STRING;
+	IhmBt_ManualAuto_Color				: BOOL;
+		
+	//ELEMENTOS PNEUMÁTICOS
+	IhmBt_Y1_Ligar						: BOOL;
+	IhmBt_Y2_Ligar						: BOOL;
+	IhmBt_Y3_Ligar						: BOOL;
+	IhmBt_Y4_Ligar						: BOOL;
+	IhmBt_Y5_Ligar						: BOOL;
+	
+	IhmBt_Y6_Ligar						: BOOL;
+	IhmBt_Y7_Ligar						: BOOL;
+	IhmBt_Y8_Ligar						: BOOL;
+	IhmBt_Y9_Ligar						: BOOL;	
+	
+	IhmBt_VP_Teste						: BOOL;
+	
+	//MOTORES
+	//SERVO EIXO X E Y
+	IhmBt_ServoXY_X1					: BOOL;
+	IhmBt_ServoXY_X10					: BOOL;
+	IhmBt_ServoXY_X100					: BOOL;
+	
+	//SERVO EIXO X
+	IhmBt_ServoX_Reset					: BOOL;
+	IhmBt_ServoX_Home					: BOOL;
+	IhmBt_ServoX_JogBwd					: BOOL;
+	IhmBt_ServoX_JogFwd					: BOOL;
+	IhmBt_ServoX_PowerOn				: BOOL;
+	IhmBt_ServoX_Referenciar			: BOOL;
+	
+	IhmLeit_ServoX_Posicao				: LREAL;
+	IhmLeit_ServoX_Velocidade			: LREAL;
+	IhmLeit_ServoX_Torque				: LREAL;
+	
+	//SERVO EIXO Y
+	IhmBt_ServoY_Reset					: BOOL;
+	IhmBt_ServoY_Home					: BOOL;
+	IhmBt_ServoY_JogBwd					: BOOL;
+	IhmBt_ServoY_JogFwd					: BOOL;
+	IhmBt_ServoY_PowerOn				: BOOL;
+	IhmBt_ServoY_Referenciar			: BOOL;
+		
+	IhmLeit_ServoY_Posicao				: LREAL;
+	IhmLeit_ServoY_Velocidade			: LREAL;
+	IhmLeit_ServoY_Torque				: LREAL;
+	
+	//INV. MESA INDEX
+	IhmBt_MesaIndex_Sentido				: BOOL;
+	IhmBt_MesaIndex_LigarDesligar		: BOOL;
+	IhmBt_MesaIndex_Ciclo				: BOOL;
+	
+	//INV. ESTEIRA DE SAÍDA
+	IhmBt_EsteiraSaida_Sentido			: BOOL;
+	IhmBt_EsteiraSaida_LigarDesligar	: BOOL;
+	
+	IhmBt_MaquinaSolda_Reset			: BOOL;
+	IhmBt_MaquinaSolda_Start			: BOOL;
+
+(*======================		TELA MANUAL 2		======================*)
+	
+	IhmBt_ServoX_ReferenciarAutoINICIO				: BOOL;
+	IhmBt_ServoX_ReferenciarAutoFIM					: BOOL;
+	IhmBt_ServoY_ReferenciarAutoINICIO				: BOOL;
+	IhmBt_ServoY_ReferenciarAutoFIM					: BOOL;
+	
+	IhmVs_PressaoPainelPneumatico_Text				: WSTRING;
+	
+	IhmBt_ReguaPotenciometrica_CalibrarRecuo		: BOOL;
+	IhmBt_ReguaPotenciometrica_CalibrarPorca		: BOOL;
+	IhmBt_ReguaPotenciometrica_CalibrarAvanco		: BOOL;
+		
+(*======================		TELA MANUAL 3		======================*)
+	
+	IhmBt_Camera_ChangeJob					: BOOL;
+	IhmBt_Camera_Trigger					: BOOL;
+	IhmLed_Camera_JobCompleted				: BOOL;
+	IhmLed_Camera_JobResult					: BOOL;
+	
+	IhmLeit_Camera_JobID					: INT;
+	
+	IhmVs_Camera_JobResult_Text				: STRING;
+		
+(*========================================================================*)
+	
+	UserName		: STRING;
+	UserGroupName	: STRING;
+	UserGroupId		: DWORD;
+	
+	Blink_1hz		: BOOL;
+	Blick_05hz		: BOOL;
+	
+	IhmBt_Ligar			: BOOL;
+	IhmBt_Desligar		: BOOL;
+	IhmBt_Reset			: BOOL;
+	IhmBt_Pausar		: BOOL;
+	IhmBt_CondIniciais	: BOOL;
+	
+	BT_ihm_zerar_contador	: BOOL;
+	Contador_Total			: UDINT;
+	Contador_PecasAprovadas	: UDINT;
+	Contador_PecasReprovadas: UDINT;
+	
+	I1		: BOOL;
+	I2		: BOOL;
+	
+	Recipe_Select_Int				: UDINT;
+	Recipe_Names_Saved				: ARRAY [0..301] OF STRING;
+	
+	Recipe_Name_Select				: STRING;
+	
+	Recipe_No_Select				: INT;
+	Recipe_ID_Select				: INT;
+	
+//	Recipe_Pos_HomeX_Select			: LREAL;
+//	Recipe_Pos_HomeY_Select			: LREAL;
+	
+	Recipe_Pontos_Solda_Select		: INT;
+	
+	Recipe_P_X01_Solda_Select		: LREAL;
+	Recipe_P_Y01_Solda_Select		: LREAL;
+	Recipe_P01_Solda_Select			: BOOL;
+	
+	Recipe_P_X02_Solda_Select		: LREAL;
+	Recipe_P_Y02_Solda_Select		: LREAL;
+	Recipe_P02_Solda_Select			: BOOL;
+	
+	Recipe_P_X03_Solda_Select		: LREAL;
+	Recipe_P_Y03_Solda_Select		: LREAL;
+	Recipe_P03_Solda_Select			: BOOL;
+	
+	Recipe_P_X04_Solda_Select		: LREAL;
+	Recipe_P_Y04_Solda_Select		: LREAL;
+	Recipe_P04_Solda_Select			: BOOL;
+	
+	Recipe_P_X05_Solda_Select		: LREAL;
+	Recipe_P_Y05_Solda_Select		: LREAL;
+	Recipe_P05_Solda_Select			: BOOL;
+	
+	Recipe_P_X06_Solda_Select		: LREAL;
+	Recipe_P_Y06_Solda_Select		: LREAL;
+	Recipe_P06_Solda_Select			: BOOL;
+	
+	Recipe_P_X07_Solda_Select		: LREAL;
+	Recipe_P_Y07_Solda_Select		: LREAL;
+	Recipe_P07_Solda_Select			: BOOL;
+	
+	Recipe_P_X08_Solda_Select		: LREAL;
+	Recipe_P_Y08_Solda_Select		: LREAL;
+	Recipe_P08_Solda_Select			: BOOL;
+	
+	Recipe_P_X09_Solda_Select		: LREAL;
+	Recipe_P_Y09_Solda_Select		: LREAL;
+	Recipe_P09_Solda_Select			: BOOL;
+	
+	Recipe_P_X10_Solda_Select		: LREAL;
+	Recipe_P_Y10_Solda_Select		: LREAL;
+	Recipe_P10_Solda_Select			: BOOL;
+	
+	Recipe_P_X11_Solda_Select		: LREAL;
+	Recipe_P_Y11_Solda_Select		: LREAL;
+	Recipe_P11_Solda_Select			: BOOL;
+	
+	Recipe_P_X12_Solda_Select		: LREAL;
+	Recipe_P_Y12_Solda_Select		: LREAL;
+	Recipe_P12_Solda_Select			: BOOL;
+	
+	Recipe_P_X13_Solda_Select		: LREAL;
+	Recipe_P_Y13_Solda_Select		: LREAL;
+	Recipe_P13_Solda_Select			: BOOL;
+	
+	Recipe_P_X14_Solda_Select		: LREAL;
+	Recipe_P_Y14_Solda_Select		: LREAL;
+	Recipe_P14_Solda_Select			: BOOL;
+	
+	Recipe_P_X15_Solda_Select		: LREAL;
+	Recipe_P_Y15_Solda_Select		: LREAL;
+	Recipe_P15_Solda_Select			: BOOL;
+
+	Recipe_Pontos_Camera_Select		: INT;
+	Recipe_JobID_F01_Camera_Select	: INT;
+	Recipe_JobID_F02_Camera_Select	: INT;
+	Recipe_JobID_F03_Camera_Select	: INT;
+	Recipe_JobID_F04_Camera_Select	: INT;
+	Recipe_JobID_F05_Camera_Select	: INT;
+	
+//	Recipe_F01_Camera_Select		: BOOL;
+//	Recipe_F02_Camera_Select		: BOOL;
+//	Recipe_F03_Camera_Select		: BOOL;
+//	Recipe_F04_Camera_Select		: BOOL;
+//	Recipe_F05_Camera_Select		: BOOL;
+
+
+	Recipe_Valvula_Proporcional_Select	: LREAL;
+	
+	Recipe_Pecas_Caixa_Select		: INT;
+		
+	NumPontosSolda					: INT;
+	NumPontosCamera					: INT;
+	
+	TargetX							: ARRAY[0..14] OF LREAL;
+	TargetY							: ARRAY[0..14] OF LREAL;
+	SoldaXY							: ARRAY[0..14] OF BOOL;
+	
+	CameraJobID						: ARRAY[0..4] OF INT;
+	
+	PosicaoOrigemX					: LREAL;
+	PosicaoOrigemY					: LREAL;
+	
+(*========================================================================*)
+	
+END_VAR
+
+VAR_GLOBAL RETAIN
+
+(*======================		TELA RECEITA		======================*)
+
+	IhmEscr_Receita_MaquinaSolda		: INT;
+
+(*======================		TELA MANUAL 1		======================*)
+
+	//ELEMENTOS PNEUMÁTICOS
+	IhmEscr_ValvulaProporcional			: INT;
+
+	//SERVO EIXO X E Y
+	IhmEscr_ServoXY_TorqueMax			: INT;
+	IhmEscr_ServoXY_TempoTorqueMax		: INT;
+	IhmEscr_ServoXY_VelocidadeAuto		: INT;
+	IhmEscr_ServoXY_VelocidadeManual	: INT;
+	
+	//INV. MESA INDEX
+	IhmEscr_MesaIndex_Frequencia		: INT;
+	IhmEscr_MesaIndex_DelayParada		: REAL;
+	
+	//INV. ESTEIRA DE SAÍDA
+	IhmEscr_EsteiraSaida_Frequencia		: INT;
+
+(*======================		TELA MANUAL 2		======================*)
+	
+	IhmEscr_ReguaPotenciometrica_ToleranciaRecuo	: REAL;
+	IhmEscr_ReguaPotenciometrica_ToleranciaPorca	: REAL;
+	IhmEscr_ReguaPotenciometrica_ToleranciaAvanco	: REAL;	
+		
+(*======================		TELA MANUAL 3		======================*)
+	
+	IhmEscr_Camera_SetJob					: INT;
+	
+	IhmEscr_Camera_DelayError				: TIME;
+	
+(*==================		RÉGUA POTENCIOMÉTRICA		==================*)	
+
+	ReguaPotenciometricaPosicao			: REAL;
+	ReguaPotenciometricaSinal			: INT;
+	
+	ReguaPotenciometrica_Recuada		: REAL;
+	ReguaPotenciometrica_Recuada_LI		: REAL;
+	ReguaPotenciometrica_Recuada_LS		: REAL;
+
+	ReguaPotenciometrica_Porca			: REAL;
+	ReguaPotenciometrica_Porca_LI		: REAL;
+	ReguaPotenciometrica_Porca_LS		: REAL;
+
+	ReguaPotenciometrica_Avancada		: REAL;
+	ReguaPotenciometrica_Avancada_LI	: REAL;
+	ReguaPotenciometrica_Avancada_LS	: REAL;
+	
+(*========================================================================*)
+
+END_VAR
+
+VAR_GLOBAL CONSTANT
+
+	MAX_CSV_ROWS 			: UDINT := 30;
+	MAX_CSV_COLUMNS 		: UDINT := 60;
+	MAX_CSV_FIELD_LENGTH	: UDINT := 100;
+
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

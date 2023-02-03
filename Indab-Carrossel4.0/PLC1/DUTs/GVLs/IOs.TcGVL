@@ -1,0 +1,263 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <GVL Name="IOs" Id="{cfcc32c0-41e8-41fd-b764-cebcbe623419}">
+    <Declaration><![CDATA[VAR_GLOBAL
+
+(*======================		ENTRADAS DIGITAIS		======================*)
+
+	//Cartão de Entradas 0:= EntradaI0_0
+	EntradaI0_0		AT %I*	: BOOL;
+	EntradaI0_1		AT %I*	: BOOL;
+	EntradaI0_2		AT %I*	: BOOL;
+	EntradaI0_3		AT %I*	: BOOL;
+	EntradaI0_4		AT %I*	: BOOL;
+	EntradaI0_5		AT %I*	: BOOL;
+	EntradaI0_6		AT %I*	: BOOL;
+	EntradaI0_7		AT %I*	: BOOL;
+	EntradaI1_0		AT %I*	: BOOL;
+	EntradaI1_1		AT %I*	: BOOL;
+	EntradaI1_2		AT %I*	: BOOL;
+	EntradaI1_3		AT %I*	: BOOL;
+	EntradaI1_4		AT %I*	: BOOL;
+	EntradaI1_5		AT %I*	: BOOL;
+	EntradaI1_6		AT %I*	: BOOL;
+	EntradaI1_7		AT %I*	: BOOL;
+	
+	//Cartão de Entradas 1
+	EntradaI2_0		AT %I*	: BOOL;
+	EntradaI2_1		AT %I*	: BOOL;
+	EntradaI2_2		AT %I*	: BOOL;
+	EntradaI2_3		AT %I*	: BOOL;
+	EntradaI2_4		AT %I*	: BOOL;
+	EntradaI2_5		AT %I*	: BOOL;
+	EntradaI2_6		AT %I*	: BOOL;
+	EntradaI2_7		AT %I*	: BOOL;
+	EntradaI3_0		AT %I*	: BOOL;
+	EntradaI3_1		AT %I*	: BOOL;
+	EntradaI3_2		AT %I*	: BOOL;
+	EntradaI3_3		AT %I*	: BOOL;
+	EntradaI3_4		AT %I*	: BOOL;
+	EntradaI3_5		AT %I*	: BOOL;
+	EntradaI3_6		AT %I*	: BOOL;
+	EntradaI3_7		AT %I*	: BOOL;
+	
+	//Cartão de Entradas 2
+	EntradaI4_0		AT %I*	: BOOL;
+	EntradaI4_1		AT %I*	: BOOL;
+	EntradaI4_2		AT %I*	: BOOL;
+	EntradaI4_3		AT %I*	: BOOL;
+	EntradaI4_4		AT %I*	: BOOL;
+	EntradaI4_5		AT %I*	: BOOL;
+	EntradaI4_6		AT %I*	: BOOL;
+	EntradaI4_7		AT %I*	: BOOL;
+	EntradaI5_0		AT %I*	: BOOL;
+	EntradaI5_1		AT %I*	: BOOL;
+	EntradaI5_2		AT %I*	: BOOL;
+	EntradaI5_3		AT %I*	: BOOL;
+	EntradaI5_4		AT %I*	: BOOL;
+	EntradaI5_5		AT %I*	: BOOL;
+	EntradaI5_6		AT %I*	: BOOL;
+	EntradaI5_7		AT %I*	: BOOL;
+	
+	//Cartão de Entradas 3
+	EntradaI6_0		AT %I*	: BOOL;
+	EntradaI6_1		AT %I*	: BOOL;
+	EntradaI6_2		AT %I*	: BOOL;
+	EntradaI6_3		AT %I*	: BOOL;
+	EntradaI6_4		AT %I*	: BOOL;
+	EntradaI6_5		AT %I*	: BOOL;
+	EntradaI6_6		AT %I*	: BOOL;
+	EntradaI6_7		AT %I*	: BOOL;
+	EntradaI7_0		AT %I*	: BOOL;
+	EntradaI7_1		AT %I*	: BOOL;
+	EntradaI7_2		AT %I*	: BOOL;
+	EntradaI7_3		AT %I*	: BOOL;
+	EntradaI7_4		AT %I*	: BOOL;
+	EntradaI7_5		AT %I*	: BOOL;
+	EntradaI7_6		AT %I*	: BOOL;
+	EntradaI7_7		AT %I*	: BOOL;
+	
+(*============================================================================*)
+(*=========================		SAÍDAS DIGITAIS		==========================*)
+	//Outputs
+	
+	//Cartão de Saídas 0
+	SaidaQ0_0		AT %Q*	: BOOL;
+	SaidaQ0_1		AT %Q*	: BOOL;
+	SaidaQ0_2		AT %Q*	: BOOL;
+	SaidaQ0_3		AT %Q*	: BOOL;
+	SaidaQ0_4		AT %Q*	: BOOL;
+	SaidaQ0_5		AT %Q*	: BOOL;
+	SaidaQ0_6		AT %Q*	: BOOL;
+	SaidaQ0_7		AT %Q*	: BOOL;
+	SaidaQ1_0		AT %Q*	: BOOL;
+	SaidaQ1_1		AT %Q*	: BOOL;
+	SaidaQ1_2		AT %Q*	: BOOL;
+	SaidaQ1_3		AT %Q*	: BOOL;
+	SaidaQ1_4		AT %Q*	: BOOL;
+	SaidaQ1_5		AT %Q*	: BOOL;
+	SaidaQ1_6		AT %Q*	: BOOL;
+	SaidaQ1_7		AT %Q*	: BOOL;
+	
+	//Cartão de Saídas 1
+	SaidaQ2_0		AT %Q*	: BOOL;
+	SaidaQ2_1		AT %Q*	: BOOL;
+	SaidaQ2_2		AT %Q*	: BOOL;
+	SaidaQ2_3		AT %Q*	: BOOL;
+	SaidaQ2_4		AT %Q*	: BOOL;
+	SaidaQ2_5		AT %Q*	: BOOL;
+	SaidaQ2_6		AT %Q*	: BOOL;
+	SaidaQ2_7		AT %Q*	: BOOL;
+	SaidaQ3_0		AT %Q*	: BOOL;
+	SaidaQ3_1		AT %Q*	: BOOL;
+	SaidaQ3_2		AT %Q*	: BOOL;
+	SaidaQ3_3		AT %Q*	: BOOL;
+	SaidaQ3_4		AT %Q*	: BOOL;
+	SaidaQ3_5		AT %Q*	: BOOL;
+	SaidaQ3_6		AT %Q*	: BOOL;
+	SaidaQ3_7		AT %Q*	: BOOL;
+	
+	//Cartão de Saídas 2
+	SaidaQ4_0		AT %Q*	: BOOL;
+	SaidaQ4_1		AT %Q*	: BOOL;
+	SaidaQ4_2		AT %Q*	: BOOL;
+	SaidaQ4_3		AT %Q*	: BOOL;
+	SaidaQ4_4		AT %Q*	: BOOL;
+	SaidaQ4_5		AT %Q*	: BOOL;
+	SaidaQ4_6		AT %Q*	: BOOL;
+	SaidaQ4_7		AT %Q*	: BOOL;
+	SaidaQ5_0		AT %Q*	: BOOL;
+	SaidaQ5_1		AT %Q*	: BOOL;
+	SaidaQ5_2		AT %Q*	: BOOL;
+	SaidaQ5_3		AT %Q*	: BOOL;
+	SaidaQ5_4		AT %Q*	: BOOL;
+	SaidaQ5_5		AT %Q*	: BOOL;
+	SaidaQ5_6		AT %Q*	: BOOL;
+	SaidaQ5_7		AT %Q*	: BOOL;
+	
+	//Cartão de Saídas 3
+	SaidaQ6_0		AT %Q*	: BOOL;
+	SaidaQ6_1		AT %Q*	: BOOL;
+	SaidaQ6_2		AT %Q*	: BOOL;
+	SaidaQ6_3		AT %Q*	: BOOL;
+	SaidaQ6_4		AT %Q*	: BOOL;
+	SaidaQ6_5		AT %Q*	: BOOL;
+	SaidaQ6_6		AT %Q*	: BOOL;
+	SaidaQ6_7		AT %Q*	: BOOL;
+	SaidaQ7_0		AT %Q*	: BOOL;
+	SaidaQ7_1		AT %Q*	: BOOL;
+	SaidaQ7_2		AT %Q*	: BOOL;
+	SaidaQ7_3		AT %Q*	: BOOL;
+	SaidaQ7_4		AT %Q*	: BOOL;
+	SaidaQ7_5		AT %Q*	: BOOL;
+	SaidaQ7_6		AT %Q*	: BOOL;
+	SaidaQ7_7		AT %Q*	: BOOL;	
+
+(*============================================================================*)
+(*======================		ENTRADAS ANALÓGICAS		======================*)
+
+	//Cartão de Entradas
+	EntradaA0_0		AT %I*	: INT;
+	EntradaA0_1		AT %I*	: INT;
+	EntradaA0_2		AT %I*	: INT;
+	EntradaA0_3		AT %I*	: INT;
+
+(*============================================================================*)	
+	
+(*============================================================================*)
+(*======================		SAÍDAS ANALÓGICAS		======================*)
+
+	//Cartão de Saídas 0
+	SaidaA0_0		AT %Q*	: INT;
+	SaidaA0_1		AT %Q*	: INT;
+	SaidaA0_2		AT %Q*	: INT;
+	SaidaA0_3		AT %Q*	: INT;
+		
+(*============================================================================*)
+
+(*======================		REDE ETHERNET/IP		======================*)
+
+(*==========================		SAFETY PLC		==========================*)
+
+	SafetyPLC_In_Byte0 		AT %I*:BYTE;
+	SafetyPLC_In_Byte1 		AT %I*:BYTE;
+	SafetyPLC_In_Byte2 		AT %I*:BYTE;
+	SafetyPLC_In_Byte3 		AT %I*:BYTE;
+	SafetyPLC_In_Byte4 		AT %I*:BYTE;
+	SafetyPLC_In_Byte5 		AT %I*:BYTE;
+	
+	SafetyPLC_Out_Byte0 	AT %Q*:BYTE;
+
+(*============================================================================*)
+
+(*===================		CÂMERA SICK - INSPECTOR 63		==================*)
+
+	CameraSickIn_0		AT %I*:BYTE;
+	CameraSickIn_1		AT %I*:BYTE;
+	CameraSickIn_2		AT %I*:BYTE;
+	CameraSickIn_3		AT %I*:BYTE;
+	CameraSickIn_4		AT %I*:BYTE;
+	CameraSickIn_5		AT %I*:BYTE;
+	CameraSickIn_6		AT %I*:BYTE;
+	CameraSickIn_7		AT %I*:BYTE;
+	CameraSickIn_8		AT %I*:BYTE;
+	CameraSickIn_9		AT %I*:BYTE;
+
+	CameraSickOut_0		AT %Q*:BYTE;
+	CameraSickOut_1		AT %Q*:BYTE;
+	CameraSickOut_2		AT %Q*:BYTE;
+	CameraSickOut_3		AT %Q*:BYTE;
+	CameraSickOut_4		AT %Q*:BYTE;
+	CameraSickOut_5		AT %Q*:BYTE;
+	CameraSickOut_6		AT %Q*:BYTE;
+	CameraSickOut_7		AT %Q*:BYTE;
+	CameraSickOut_8		AT %Q*:BYTE;
+	CameraSickOut_9		AT %Q*:BYTE;
+
+(*============================================================================*)
+
+(*=====================		ROBÔ YASKAWA/MOTOMAN		======================*)
+	
+	Robot_PLC_0 		AT %I*:BYTE;
+	Robot_PLC_1 		AT %I*:BYTE;
+	Robot_PLC_2 		AT %I*:BYTE;
+	Robot_PLC_3 		AT %I*:BYTE;
+	Robot_PLC_4 		AT %I*:BYTE;
+	Robot_PLC_5 		AT %I*:BYTE;
+	Robot_PLC_6 		AT %I*:BYTE;
+	Robot_PLC_7 		AT %I*:BYTE;
+	Robot_PLC_8 		AT %I*:BYTE;
+	Robot_PLC_9 		AT %I*:BYTE;
+	Robot_PLC_10 		AT %I*:BYTE;
+	Robot_PLC_11 		AT %I*:BYTE;
+	Robot_PLC_12 		AT %I*:BYTE;
+	Robot_PLC_13 		AT %I*:BYTE;
+	Robot_PLC_14 		AT %I*:BYTE;
+	Robot_PLC_15 		AT %I*:BYTE;
+	Robot_PLC_16 		AT %I*:BYTE;
+	Robot_PLC_17 		AT %I*:BYTE;
+	Robot_PLC_18 		AT %I*:BYTE;
+	Robot_PLC_19 		AT %I*:BYTE;
+	
+	PLC_Robot_0			AT %Q*:BYTE;
+	PLC_Robot_1			AT %Q*:BYTE;
+	PLC_Robot_2			AT %Q*:BYTE;
+	PLC_Robot_3			AT %Q*:BYTE;
+	PLC_Robot_4			AT %Q*:BYTE;
+	PLC_Robot_5			AT %Q*:BYTE;
+	PLC_Robot_6			AT %Q*:BYTE;
+	PLC_Robot_7			AT %Q*:BYTE;
+	PLC_Robot_8			AT %Q*:BYTE;
+	PLC_Robot_9			AT %Q*:BYTE;
+	PLC_Robot_10		AT %Q*:BYTE;
+	PLC_Robot_11		AT %Q*:BYTE;
+	PLC_Robot_12		AT %Q*:BYTE;
+	PLC_Robot_13		AT %Q*:BYTE;
+	PLC_Robot_14		AT %Q*:BYTE;
+	PLC_Robot_15		AT %Q*:BYTE;
+
+(*============================================================================*)
+	
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

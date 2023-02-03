@@ -1,0 +1,203 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="Camera" Id="{886e5621-bd2b-4601-8e4b-652259725d6d}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Camera
+VAR
+
+	BT_test						: BOOL;
+	
+	TON_DelayTest1				: TON;
+	TON_DelayTest2				: TON;
+	TON_DelayTest3				: TON;
+	TON_DelayTest4				: TON;
+	TON_DelayTest5				: TON;
+
+(*=========================		CAMERA SICK		==========================*)	
+ 
+ PassoCameraAuto			: INT;
+ TON_CameraError			: TON;
+ TON_CameraChangeJob		: TON;
+ 
+(*========================================================================*)
+
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*=============		Câmera Sick Comunicação Ethernet/IP		==============*)
+
+Camera_JobResult := CameraSickIn_3.0;
+Camera_JobCompleted := CameraSickIn_0.2;
+Camera_JobID := CameraSickIn_2;
+
+CameraSickOut_0.0 := Camera_Trigger;
+CameraSickOut_0.1 := Camera_ChangeJob;
+CameraSickOut_2 := Camera_SetJob;
+
+(*========================================================================*)
+
+IhmLeit_Camera_JobID := BYTE_TO_INT(Camera_JobID);
+
+IhmVs_Camera_JobResult_Text := 'Test';
+
+(*=========================		Modo Manual		==========================*)
+
+IF (MaquinaModoManual) THEN
+
+	Camera_SetJob := INT_TO_BYTE(IhmEscr_Camera_SetJob);
+	Camera_ChangeJob := IhmBt_Camera_ChangeJob;
+	Camera_Trigger := IhmBt_Camera_Trigger;
+
+END_IF
+
+(*======================		Modo Automático		======================*)
+
+Camera_TargetJob[0] := 1;
+Camera_TargetJob[1] := 2;
+
+//Condição de Bloqueio da Máquina de Estados - Câmera SICK
+IF (Alarmes.AlarmeGrave
+	//OR NOT Alarmes.AlarmeMedio
+	//OR NOT MaquinaLigada
+	OR NOT MaquinaModoAuto
+	) THEN
+	PassoCameraAuto := 1000;
+END_IF
+
+CASE PassoCameraAuto OF
+	
+	//Passo 0 - Inicialização	
+	0: PassoCameraAuto := 10;
+	   
+	//Passo 10 - Condição para Iniciar a Rotina da Camera
+	10: IF  (Flag_Robo_Camera) THEN
+			Flag_Robo_Camera := FALSE;
+			PassoCameraAuto := 20;
+		END_IF
+		
+	//Passo 20 - Set Job
+	20: Camera_SetJob := INT_TO_BYTE(Camera_TargetJob[Camera_indexJob]);
+		PassoCameraAuto := 21;
+
+	21: Camera_ChangeJob := TRUE;
+		TON_CameraChangeJob(IN := TRUE, PT := T#1S);
+		IF (TON_CameraChangeJob.Q) THEN
+			Camera_ChangeJob := FALSE;
+			TON_CameraChangeJob(IN := FALSE);
+			PassoCameraAuto := 30;	
+		END_IF
+		
+	//Passo 30 - Disparar Câmera (TRIGGER) 
+	30:	Camera_Trigger := TRUE;
+		TON_DelayTest1(IN := TRUE, PT := T#1S);
+		IF (TON_DelayTest1.Q) THEN
+			Camera_Trigger := FALSE;
+			TON_DelayTest1(IN := FALSE);
+			PassoCameraAuto := 50;	
+		END_IF
+		//PassoCameraAuto := 40;
+		
+(*	//Passo 40 - Aguardar Análise da Câmera
+	40: //TON_CameraError(IN := TRUE, PT := T#1S);
+		IF (Camera_JobCompleted) THEN
+			TON_CameraError(IN := FALSE);
+			PassoCameraAuto := 50;
+		END_IF
+		//IF (TON_CameraError.Q) THEN
+		//	TON_CameraError(IN := FALSE);
+			//Set Flag de Erro
+		//	PassoCameraAuto := 50;
+		//END_IF
+*)		
+	//Passo 50 - Sinalizar Resultado da Avaliação
+	50: IF (Camera_JobResult) THEN
+			PecaAprovada := TRUE;
+		ELSE
+			PecaAprovada := FALSE;
+		END_IF
+
+		PassoCameraAuto := 60;
+		
+	//Passo 60 - Sinalizar Conclusão da Rotina
+	60: Camera_Trigger := FALSE;
+		Flag_Camera_Robo := TRUE;
+		PassoCameraAuto := 1000;	
+	
+	//Passo 1000 - Finalização
+	1000: PassoCameraAuto := 0;
+	
+END_CASE
+
+(*========================================================================*)]]></ST>
+    </Implementation>
+    <LineIds Name="Camera">
+      <LineId Id="374" Count="0" />
+      <LineId Id="1204" Count="3" />
+      <LineId Id="1108" Count="0" />
+      <LineId Id="1106" Count="0" />
+      <LineId Id="1169" Count="0" />
+      <LineId Id="1286" Count="0" />
+      <LineId Id="1279" Count="0" />
+      <LineId Id="1277" Count="0" />
+      <LineId Id="1276" Count="0" />
+      <LineId Id="1275" Count="0" />
+      <LineId Id="1285" Count="0" />
+      <LineId Id="1284" Count="0" />
+      <LineId Id="1208" Count="1" />
+      <LineId Id="1266" Count="0" />
+      <LineId Id="1263" Count="0" />
+      <LineId Id="1270" Count="0" />
+      <LineId Id="1267" Count="0" />
+      <LineId Id="1281" Count="0" />
+      <LineId Id="1287" Count="0" />
+      <LineId Id="1269" Count="0" />
+      <LineId Id="1268" Count="0" />
+      <LineId Id="939" Count="1" />
+      <LineId Id="1344" Count="0" />
+      <LineId Id="1343" Count="0" />
+      <LineId Id="1346" Count="0" />
+      <LineId Id="948" Count="13" />
+      <LineId Id="1122" Count="0" />
+      <LineId Id="963" Count="4" />
+      <LineId Id="1310" Count="2" />
+      <LineId Id="1374" Count="0" />
+      <LineId Id="1377" Count="0" />
+      <LineId Id="1376" Count="0" />
+      <LineId Id="1319" Count="2" />
+      <LineId Id="1378" Count="0" />
+      <LineId Id="1367" Count="0" />
+      <LineId Id="1317" Count="0" />
+      <LineId Id="1324" Count="0" />
+      <LineId Id="969" Count="1" />
+      <LineId Id="1368" Count="1" />
+      <LineId Id="1372" Count="0" />
+      <LineId Id="1382" Count="0" />
+      <LineId Id="1371" Count="0" />
+      <LineId Id="1361" Count="0" />
+      <LineId Id="973" Count="2" />
+      <LineId Id="1002" Count="0" />
+      <LineId Id="1087" Count="0" />
+      <LineId Id="1123" Count="0" />
+      <LineId Id="1088" Count="1" />
+      <LineId Id="1092" Count="0" />
+      <LineId Id="1094" Count="1" />
+      <LineId Id="1093" Count="0" />
+      <LineId Id="1091" Count="0" />
+      <LineId Id="1085" Count="0" />
+      <LineId Id="1003" Count="0" />
+      <LineId Id="1008" Count="0" />
+      <LineId Id="1098" Count="0" />
+      <LineId Id="1342" Count="0" />
+      <LineId Id="1105" Count="0" />
+      <LineId Id="1102" Count="0" />
+      <LineId Id="1388" Count="0" />
+      <LineId Id="1096" Count="0" />
+      <LineId Id="1009" Count="1" />
+      <LineId Id="1034" Count="0" />
+      <LineId Id="1145" Count="0" />
+      <LineId Id="1097" Count="0" />
+      <LineId Id="1035" Count="0" />
+      <LineId Id="1076" Count="3" />
+      <LineId Id="454" Count="0" />
+      <LineId Id="155" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

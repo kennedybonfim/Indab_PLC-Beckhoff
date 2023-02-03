@@ -1,0 +1,853 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="Main_Receita" Id="{61232688-1833-4a4e-a451-5f3e46c86c1c}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Main_Receita
+VAR
+	(*	In USA/UK the CSV field separator is a comma.
+	In Germany and some other European countries the CSV field separator is a semicolon. *)
+	bChangeSeparatorToComma	: BOOL := FALSE;
+	
+	i : UDINT;
+	
+	PassoLimparMemoriasReceita 	: INT;
+	
+	timer_Leitura_Receitas_Salvas	: TON;
+	Endereco_vazio		: INT;
+	b_reorganizar		: INT;
+	Item_deletado		: UDINT;
+	Item_criar			: UDINT;
+	Item_livre			: UDINT;
+	Item_Atual			: UDINT;
+	
+	Row_copy			: ARRAY[0..MAX_CSV_COLUMNS] OF STRING(MAX_CSV_FIELD_LENGTH);(* Target PLC database *)
+	
+	LengthScrollBar_PontosSolda			: INT;
+	ScrollBar_PontosSolda				: INT;
+	ScrollScreen_PontosSolda			: INT;
+	
+	LengthScrollBar_PontosCamera		: INT;
+	ScrollBar_PontosCamera				: INT;
+	ScrollScreen_PontosCamera			: INT;
+	
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*========================================================================*)
+(*=============		BARRA DE ROLAGEM - TELA RECEITAS		==============*)
+
+//Lista de Pontos de Solda
+IF(Recipe_Pontos_Solda_Select <=2) THEN
+	ScrollBar_PontosSolda := 0;
+	LengthScrollBar_PontosSolda := 0;
+ELSE
+	LengthScrollBar_PontosSolda := (Recipe_Pontos_Solda_Select-2)*60;
+END_IF
+
+ScrollScreen_PontosSolda := (-1)*ScrollBar_PontosSolda;
+
+//Lista de Pontos de Avaliação - Câmera
+IF(Recipe_Pontos_Camera_Select <=2) THEN
+	ScrollBar_PontosCamera := 0;
+	LengthScrollBar_PontosCamera := 0;
+ELSE
+	LengthScrollBar_PontosCamera := (Recipe_Pontos_Camera_Select-2)*60;
+END_IF
+
+ScrollScreen_PontosCamera := (-1)*ScrollBar_PontosCamera;
+
+(*========================================================================*)
+
+IF bChangeSeparatorToComma THEN
+	DEFAULT_CSV_FIELD_SEP := 16#2C;(* Comma ASCII code *)
+ELSE
+	DEFAULT_CSV_FIELD_SEP := 16#3B;(* Semicolon ASCII code *)
+END_IF
+
+P_Read_Tabela();
+P_Write_Tabela();
+//P_ArgToConvExample();(* This sample program shows the usage of the ARG_TO_CSVFIELD and CSVFILED_TO_ARG conversion functions *)
+//P_StringToConvExample(); (* This sample program shows the usage of the STRING_TO_CSVFIELD and CSVFIELD_TO_STRING conversion functions *)
+
+(*timer_Leitura_Receitas_Salvas (in := TRUE, pt := T#1M);
+IF timer_Leitura_Receitas_Salvas.Q THEN
+	timer_Leitura_Receitas_Salvas (in := FALSE);
+	bRead := TRUE;
+END_IF*)
+
+IF NOT b_deletar_receita AND NOT b_editar_receita AND NOT b_criar_receita THEN
+	
+	Recipe_Name_Select					:= database_read[Recipe_select_int, 0];
+	Recipe_No_Select					:= STRING_TO_INT	(database_read[Recipe_select_int, 1]);
+	Recipe_ID_Select					:= STRING_TO_INT	(database_read[Recipe_select_int, 2]);
+		
+	Recipe_Pontos_Solda_Select			:= STRING_TO_INT	(database_read[Recipe_select_int, 3]);
+		
+	Recipe_P_X01_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 4]);
+	Recipe_P_Y01_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 5]);
+	Recipe_P01_Solda_Select				:= STRING_TO_BOOL	(database_read[Recipe_select_int, 6]);
+	Recipe_P_X02_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 7]);
+	Recipe_P_Y02_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 8]);
+	Recipe_P02_Solda_Select				:= STRING_TO_BOOL	(database_read[Recipe_select_int, 9]);	
+	Recipe_P_X03_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 10]);
+	Recipe_P_Y03_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 11]);
+	Recipe_P03_Solda_Select				:= STRING_TO_BOOL	(database_read[Recipe_select_int, 12]);
+	Recipe_P_X04_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 13]);
+	Recipe_P_Y04_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 14]);
+	Recipe_P04_Solda_Select				:= STRING_TO_BOOL	(database_read[Recipe_select_int, 15]);
+	Recipe_P_X05_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 16]);
+	Recipe_P_Y05_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 17]);
+	Recipe_P05_Solda_Select				:= STRING_TO_BOOL	(database_read[Recipe_select_int, 18]);
+	
+	Recipe_P_X06_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 19]);
+	Recipe_P_Y06_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 20]);
+	Recipe_P06_Solda_Select				:= STRING_TO_BOOL	(database_read[Recipe_select_int, 21]);
+	Recipe_P_X07_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 22]);
+	Recipe_P_Y07_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 23]);
+	Recipe_P07_Solda_Select				:= STRING_TO_BOOL	(database_read[Recipe_select_int, 24]);	
+	Recipe_P_X08_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 25]);
+	Recipe_P_Y08_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 26]);
+	Recipe_P08_Solda_Select				:= STRING_TO_BOOL	(database_read[Recipe_select_int, 27]);
+	Recipe_P_X09_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 28]);
+	Recipe_P_Y09_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 29]);
+	Recipe_P09_Solda_Select				:= STRING_TO_BOOL	(database_read[Recipe_select_int, 30]);
+	Recipe_P_X10_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 31]);
+	Recipe_P_Y10_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 32]);
+	Recipe_P10_Solda_Select				:= STRING_TO_BOOL	(database_read[Recipe_select_int, 33]);
+		
+	Recipe_P_X11_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 34]);
+	Recipe_P_Y11_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 35]);
+	Recipe_P11_Solda_Select				:= STRING_TO_BOOL	(database_read[Recipe_select_int, 36]);
+	Recipe_P_X12_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 37]);
+	Recipe_P_Y12_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 38]);
+	Recipe_P12_Solda_Select				:= STRING_TO_BOOL	(database_read[Recipe_select_int, 39]);	
+	Recipe_P_X13_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 40]);
+	Recipe_P_Y13_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 41]);
+	Recipe_P13_Solda_Select				:= STRING_TO_BOOL	(database_read[Recipe_select_int, 42]);
+	Recipe_P_X14_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 43]);
+	Recipe_P_Y14_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 44]);
+	Recipe_P14_Solda_Select				:= STRING_TO_BOOL	(database_read[Recipe_select_int, 45]);
+	Recipe_P_X15_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 46]);
+	Recipe_P_Y15_Solda_Select			:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 47]);
+	Recipe_P15_Solda_Select				:= STRING_TO_BOOL	(database_read[Recipe_select_int, 48]);
+		
+	Recipe_Valvula_Proporcional_Select	:= STRING_TO_LREAL 	(database_read[Recipe_select_int, 49]);
+	
+	Recipe_Pontos_Camera_Select			:= STRING_TO_INT	(database_read[Recipe_select_int, 50]);
+	Recipe_JobID_F01_Camera_Select		:= STRING_TO_INT 	(database_read[Recipe_select_int, 51]);
+	Recipe_JobID_F02_Camera_Select		:= STRING_TO_INT 	(database_read[Recipe_select_int, 52]);
+	Recipe_JobID_F03_Camera_Select		:= STRING_TO_INT 	(database_read[Recipe_select_int, 53]);
+	Recipe_JobID_F04_Camera_Select		:= STRING_TO_INT 	(database_read[Recipe_select_int, 54]);
+	Recipe_JobID_F05_Camera_Select		:= STRING_TO_INT 	(database_read[Recipe_select_int, 55]);
+
+	Recipe_Pecas_Caixa_Select			:= STRING_TO_INT 	(database_read[Recipe_select_int, 56]);
+	
+	Recipe_names_saved [i] := database_read [i,0];
+
+	IF Recipe_names_saved[i] <> '' THEN
+		Item_Atual := 1;	
+	END_IF
+	
+	IF Item_Atual = 1 AND Recipe_names_saved[i] = '' THEN
+		Item_Atual := 0;
+		Item_livre := i;
+		i:=0; 
+	END_IF
+	
+	i := i +1;
+	IF (i >= MAX_CSV_ROWS)  THEN 
+		i:=0; 
+	END_IF
+END_IF
+	
+// Verificações
+//	Ao Deletar e salvar uma receita - O sistema deve verificar qual endereço ficou em vazio, e fazer uma rotina de reorganiza-lo e depois escrever na tabela de receitas
+// Criar Receitar - verificar qual o ultima endereço da tabela vazia. Escrever ali o valores e ao apertar salvar escrever na tabela de receitas
+//Editar e Cancelar - Não escreve na tabela
+
+IF b_deletar_receita AND b_reorganizar = 0 THEN
+	
+	Recipe_Name_Select					:= '';
+	Recipe_No_Select					:= 0;
+	Recipe_ID_Select					:= 0;
+		
+	Recipe_Pontos_Solda_Select			:= 0;
+		
+	Recipe_P_X01_Solda_Select			:= 0.0;
+	Recipe_P_Y01_Solda_Select			:= 0.0;
+	Recipe_P01_Solda_Select				:= FALSE;
+	Recipe_P_X02_Solda_Select			:= 0.0;
+	Recipe_P_Y02_Solda_Select			:= 0.0;
+	Recipe_P02_Solda_Select				:= FALSE;	
+	Recipe_P_X03_Solda_Select			:= 0.0;
+	Recipe_P_Y03_Solda_Select			:= 0.0;
+	Recipe_P03_Solda_Select				:= FALSE;
+	Recipe_P_X04_Solda_Select			:= 0.0;
+	Recipe_P_Y04_Solda_Select			:= 0.0;
+	Recipe_P04_Solda_Select				:= FALSE;
+	Recipe_P_X05_Solda_Select			:= 0.0;
+	Recipe_P_Y05_Solda_Select			:= 0.0;
+	Recipe_P05_Solda_Select				:= FALSE;
+	
+	Recipe_P_X06_Solda_Select			:= 0.0;
+	Recipe_P_Y06_Solda_Select			:= 0.0;
+	Recipe_P06_Solda_Select				:= FALSE;
+	Recipe_P_X07_Solda_Select			:= 0.0;
+	Recipe_P_Y07_Solda_Select			:= 0.0;
+	Recipe_P07_Solda_Select				:= FALSE;	
+	Recipe_P_X08_Solda_Select			:= 0.0;
+	Recipe_P_Y08_Solda_Select			:= 0.0;
+	Recipe_P08_Solda_Select				:= FALSE;
+	Recipe_P_X09_Solda_Select			:= 0.0;
+	Recipe_P_Y09_Solda_Select			:= 0.0;
+	Recipe_P09_Solda_Select				:= FALSE;
+	Recipe_P_X10_Solda_Select			:= 0.0;
+	Recipe_P_Y10_Solda_Select			:= 0.0;
+	Recipe_P10_Solda_Select				:= FALSE;
+		
+	Recipe_P_X11_Solda_Select			:= 0.0;
+	Recipe_P_Y11_Solda_Select			:= 0.0;
+	Recipe_P11_Solda_Select				:= FALSE;
+	Recipe_P_X12_Solda_Select			:= 0.0;
+	Recipe_P_Y12_Solda_Select			:= 0.0;
+	Recipe_P12_Solda_Select				:= FALSE;	
+	Recipe_P_X13_Solda_Select			:= 0.0;
+	Recipe_P_Y13_Solda_Select			:= 0.0;
+	Recipe_P13_Solda_Select				:= FALSE;
+	Recipe_P_X14_Solda_Select			:= 0.0;
+	Recipe_P_Y14_Solda_Select			:= 0.0;
+	Recipe_P14_Solda_Select				:= FALSE;
+	Recipe_P_X15_Solda_Select			:= 0.0;
+	Recipe_P_Y15_Solda_Select			:= 0.0;
+	Recipe_P15_Solda_Select				:= FALSE;
+		
+	Recipe_Valvula_Proporcional_Select	:= 0.0;
+	
+	Recipe_Pontos_Camera_Select			:= 0;
+	Recipe_JobID_F01_Camera_Select		:= 0;
+	Recipe_JobID_F01_Camera_Select		:= 0;
+	Recipe_JobID_F01_Camera_Select		:= 0;
+	Recipe_JobID_F01_Camera_Select		:= 0;
+	Recipe_JobID_F01_Camera_Select		:= 0;
+
+	Recipe_Pecas_Caixa_Select			:= 0;
+	
+	IF b_cancelar_receita THEN
+		
+		b_deletar_receita := FALSE;
+		b_cancelar_receita := FALSE;
+		b_editar_receita := FALSE;
+		
+	ELSIF b_salvar_receita AND b_reorganizar = 0 THEN
+		
+		database_read[Recipe_select_int, 0] := '';
+		database_read[Recipe_select_int, 1] := '';
+		database_read[Recipe_select_int, 2] := '';
+		database_read[Recipe_select_int, 3] := '';
+		database_read[Recipe_select_int, 4] := '';
+		database_read[Recipe_select_int, 5] := '';
+		database_read[Recipe_select_int, 6] := '';
+		database_read[Recipe_select_int, 7] := '';
+		database_read[Recipe_select_int, 8] := '';
+		database_read[Recipe_select_int, 9] := '';
+		database_read[Recipe_select_int, 10] := '';
+		database_read[Recipe_select_int, 11] := '';
+		database_read[Recipe_select_int, 12] := '';
+		database_read[Recipe_select_int, 13] := '';
+		database_read[Recipe_select_int, 14] := '';
+		database_read[Recipe_select_int, 15] := '';
+		database_read[Recipe_select_int, 16] := '';
+		database_read[Recipe_select_int, 17] := '';
+		database_read[Recipe_select_int, 18] := '';
+		database_read[Recipe_select_int, 19] := '';
+		database_read[Recipe_select_int, 20] := '';
+		database_read[Recipe_select_int, 21] := '';
+		database_read[Recipe_select_int, 22] := '';
+		database_read[Recipe_select_int, 23] := '';
+		database_read[Recipe_select_int, 24] := '';
+		database_read[Recipe_select_int, 25] := '';
+		database_read[Recipe_select_int, 26] := '';
+		database_read[Recipe_select_int, 27] := '';
+		database_read[Recipe_select_int, 28] := '';
+		database_read[Recipe_select_int, 29] := '';
+		database_read[Recipe_select_int, 30] := '';
+		database_read[Recipe_select_int, 31] := '';
+		database_read[Recipe_select_int, 32] := '';
+		database_read[Recipe_select_int, 33] := '';
+		database_read[Recipe_select_int, 34] := '';
+		database_read[Recipe_select_int, 35] := '';
+		database_read[Recipe_select_int, 36] := '';
+		database_read[Recipe_select_int, 37] := '';
+		database_read[Recipe_select_int, 38] := '';
+		database_read[Recipe_select_int, 39] := '';
+		database_read[Recipe_select_int, 40] := '';
+		database_read[Recipe_select_int, 41] := '';
+		database_read[Recipe_select_int, 42] := '';
+		database_read[Recipe_select_int, 43] := '';
+		database_read[Recipe_select_int, 44] := '';
+		database_read[Recipe_select_int, 45] := '';
+		database_read[Recipe_select_int, 46] := '';
+		database_read[Recipe_select_int, 47] := '';
+		database_read[Recipe_select_int, 48] := '';
+		database_read[Recipe_select_int, 49] := '';
+		database_read[Recipe_select_int, 50] := '';
+		database_read[Recipe_select_int, 51] := '';
+		database_read[Recipe_select_int, 52] := '';
+		database_read[Recipe_select_int, 53] := '';
+		database_read[Recipe_select_int, 54] := '';
+		database_read[Recipe_select_int, 55] := '';
+		database_read[Recipe_select_int, 56] := '';
+		Item_deletado := Recipe_select_int;
+		b_reorganizar := 1;
+		b_deletar_receita := FALSE;
+		b_cancelar_receita := FALSE;
+		b_editar_receita := FALSE;
+		Simbolo_Atualizacao := TRUE;
+		//Recipe_select_int := 0;
+	END_IF
+
+END_IF
+
+IF b_reorganizar = 1 THEN
+	Item_deletado := Item_deletado + 1;
+	b_reorganizar := 2;
+ELSIF b_reorganizar = 2 THEN
+	
+	Row_copy[0]		:= (database_read[Item_deletado, 0]);
+	Row_copy[1]		:= (database_read[Item_deletado, 1]);
+	Row_copy[2]		:= (database_read[Item_deletado, 2]);
+	Row_copy[3]		:= (database_read[Item_deletado, 3]);
+	Row_copy[4]		:= (database_read[Item_deletado, 4]);
+	Row_copy[5]		:= (database_read[Item_deletado, 5]);
+	Row_copy[6]		:= (database_read[Item_deletado, 6]);
+	Row_copy[7]		:= (database_read[Item_deletado, 7]);
+	Row_copy[8]		:= (database_read[Item_deletado, 8]);
+	Row_copy[9]		:= (database_read[Item_deletado, 9]);
+	Row_copy[10]	:= (database_read[Item_deletado, 10]);
+	Row_copy[11]	:= (database_read[Item_deletado, 11]);
+	Row_copy[12]	:= (database_read[Item_deletado, 12]);
+	Row_copy[13]	:= (database_read[Item_deletado, 13]);
+	Row_copy[14]	:= (database_read[Item_deletado, 14]);
+	Row_copy[15]	:= (database_read[Item_deletado, 15]);
+	Row_copy[16]	:= (database_read[Item_deletado, 16]);
+	Row_copy[17]	:= (database_read[Item_deletado, 17]);
+	Row_copy[18]	:= (database_read[Item_deletado, 18]);
+	Row_copy[19]	:= (database_read[Item_deletado, 19]);
+	Row_copy[20]	:= (database_read[Item_deletado, 20]);
+	Row_copy[21]	:= (database_read[Item_deletado, 21]);
+	Row_copy[22]	:= (database_read[Item_deletado, 22]);
+	Row_copy[23]	:= (database_read[Item_deletado, 23]);
+	Row_copy[24]	:= (database_read[Item_deletado, 24]);
+	Row_copy[25]	:= (database_read[Item_deletado, 25]);
+	Row_copy[26]	:= (database_read[Item_deletado, 26]);
+	Row_copy[27]	:= (database_read[Item_deletado, 27]);
+	Row_copy[28]	:= (database_read[Item_deletado, 28]);
+	Row_copy[29]	:= (database_read[Item_deletado, 29]);
+	Row_copy[30]	:= (database_read[Item_deletado, 30]);
+	Row_copy[31]	:= (database_read[Item_deletado, 31]);
+	Row_copy[32]	:= (database_read[Item_deletado, 32]);
+	Row_copy[33]	:= (database_read[Item_deletado, 33]);
+	Row_copy[34]	:= (database_read[Item_deletado, 34]);
+	Row_copy[35]	:= (database_read[Item_deletado, 35]);
+	Row_copy[36]	:= (database_read[Item_deletado, 36]);
+	Row_copy[37]	:= (database_read[Item_deletado, 37]);
+	Row_copy[38]	:= (database_read[Item_deletado, 38]);
+	Row_copy[39]	:= (database_read[Item_deletado, 39]);
+	Row_copy[40]	:= (database_read[Item_deletado, 40]);
+	Row_copy[41]	:= (database_read[Item_deletado, 41]);
+	Row_copy[42]	:= (database_read[Item_deletado, 42]);
+	Row_copy[43]	:= (database_read[Item_deletado, 43]);
+	Row_copy[44]	:= (database_read[Item_deletado, 44]);
+	Row_copy[45]	:= (database_read[Item_deletado, 45]);
+	Row_copy[46]	:= (database_read[Item_deletado, 46]);
+	Row_copy[47]	:= (database_read[Item_deletado, 47]);
+	Row_copy[48]	:= (database_read[Item_deletado, 48]);
+	Row_copy[49]	:= (database_read[Item_deletado, 49]);
+	Row_copy[50]	:= (database_read[Item_deletado, 50]);
+	Row_copy[51]	:= (database_read[Item_deletado, 51]);
+	Row_copy[52]	:= (database_read[Item_deletado, 52]);
+	Row_copy[53]	:= (database_read[Item_deletado, 53]);
+	Row_copy[54]	:= (database_read[Item_deletado, 54]);
+	Row_copy[55]	:= (database_read[Item_deletado, 55]);
+	Row_copy[56]	:= (database_read[Item_deletado, 56]);
+	b_reorganizar := 3;
+
+ELSIF b_reorganizar = 3 THEN
+	
+	database_read[(Item_deletado - 1), 0] := Row_copy[0];
+	database_read[(Item_deletado - 1), 1] := Row_copy[1];
+	database_read[(Item_deletado - 1), 2] := Row_copy[2];
+	database_read[(Item_deletado - 1), 3] := Row_copy[3];
+	database_read[(Item_deletado - 1), 4] := Row_copy[4];
+	database_read[(Item_deletado - 1), 5] := Row_copy[5];
+	database_read[(Item_deletado - 1), 6] := Row_copy[6];
+	database_read[(Item_deletado - 1), 7] := Row_copy[7];
+	database_read[(Item_deletado - 1), 8] := Row_copy[8];
+	database_read[(Item_deletado - 1), 9] := Row_copy[9];
+	database_read[(Item_deletado - 1), 10] := Row_copy[10];
+	database_read[(Item_deletado - 1), 11] := Row_copy[11];
+	database_read[(Item_deletado - 1), 12] := Row_copy[12];
+	database_read[(Item_deletado - 1), 13] := Row_copy[13];
+	database_read[(Item_deletado - 1), 14] := Row_copy[14];
+	database_read[(Item_deletado - 1), 15] := Row_copy[15];
+	database_read[(Item_deletado - 1), 16] := Row_copy[16];
+	database_read[(Item_deletado - 1), 17] := Row_copy[17];
+	database_read[(Item_deletado - 1), 18] := Row_copy[18];
+	database_read[(Item_deletado - 1), 19] := Row_copy[19];
+	database_read[(Item_deletado - 1), 20] := Row_copy[20];
+	database_read[(Item_deletado - 1), 21] := Row_copy[21];
+	database_read[(Item_deletado - 1), 22] := Row_copy[22];
+	database_read[(Item_deletado - 1), 23] := Row_copy[23];
+	database_read[(Item_deletado - 1), 24] := Row_copy[24];
+	database_read[(Item_deletado - 1), 25] := Row_copy[25];
+	database_read[(Item_deletado - 1), 26] := Row_copy[26];
+	database_read[(Item_deletado - 1), 27] := Row_copy[27];
+	database_read[(Item_deletado - 1), 28] := Row_copy[28];
+	database_read[(Item_deletado - 1), 29] := Row_copy[29];
+	database_read[(Item_deletado - 1), 30] := Row_copy[30];
+	database_read[(Item_deletado - 1), 31] := Row_copy[31];
+	database_read[(Item_deletado - 1), 32] := Row_copy[32];
+	database_read[(Item_deletado - 1), 33] := Row_copy[33];
+	database_read[(Item_deletado - 1), 34] := Row_copy[34];
+	database_read[(Item_deletado - 1), 35] := Row_copy[35];
+	database_read[(Item_deletado - 1), 36] := Row_copy[36];
+	database_read[(Item_deletado - 1), 37] := Row_copy[37];
+	database_read[(Item_deletado - 1), 38] := Row_copy[38];
+	database_read[(Item_deletado - 1), 39] := Row_copy[39];
+	database_read[(Item_deletado - 1), 40] := Row_copy[40];
+	database_read[(Item_deletado - 1), 41] := Row_copy[41];
+	database_read[(Item_deletado - 1), 42] := Row_copy[42];
+	database_read[(Item_deletado - 1), 43] := Row_copy[43];
+	database_read[(Item_deletado - 1), 44] := Row_copy[44];
+	database_read[(Item_deletado - 1), 45] := Row_copy[45];
+	database_read[(Item_deletado - 1), 46] := Row_copy[46];
+	database_read[(Item_deletado - 1), 47] := Row_copy[47];
+	database_read[(Item_deletado - 1), 48] := Row_copy[48];
+	database_read[(Item_deletado - 1), 49] := Row_copy[49];
+	database_read[(Item_deletado - 1), 50] := Row_copy[50];
+	database_read[(Item_deletado - 1), 51] := Row_copy[51];
+	database_read[(Item_deletado - 1), 52] := Row_copy[52];
+	database_read[(Item_deletado - 1), 53] := Row_copy[53];
+	database_read[(Item_deletado - 1), 54] := Row_copy[54];
+	database_read[(Item_deletado - 1), 55] := Row_copy[55];
+	database_read[(Item_deletado - 1), 56] := Row_copy[56];
+	
+	IF Item_deletado >= MAX_CSV_ROWS THEN
+		Item_deletado := 0;
+		b_reorganizar := 0;
+		b_salvar_receita := FALSE;
+		b_deletar_receita := FALSE;
+		b_cancelar_receita := FALSE;
+		b_editar_receita := FALSE;
+		bWrite := TRUE;
+		Recipe_select_int := 0;
+	ELSE
+		b_reorganizar := 1;	
+	
+	END_IF
+END_IF
+	
+	
+// Editar	
+IF b_editar_receita AND NOT b_deletar_receita AND b_salvar_receita THEN
+	
+	database_read[Recipe_select_int, 0] := Recipe_Name_Select;
+	database_read[Recipe_select_int, 1] := INT_TO_STRING (Recipe_No_Select);
+	database_read[Recipe_select_int, 2] := INT_TO_STRING (Recipe_ID_Select);
+	
+	database_read[Recipe_select_int, 3] := INT_TO_STRING (Recipe_Pontos_Solda_Select);
+	
+	database_read[Recipe_select_int, 4] := LREAL_TO_STRING (Recipe_P_X01_Solda_Select);
+	database_read[Recipe_select_int, 5] := LREAL_TO_STRING (Recipe_P_Y01_Solda_Select);
+	database_read[Recipe_select_int, 6] := BOOL_TO_STRING (Recipe_P01_Solda_Select);
+	database_read[Recipe_select_int, 7] := LREAL_TO_STRING (Recipe_P_X02_Solda_Select);
+	database_read[Recipe_select_int, 8] := LREAL_TO_STRING (Recipe_P_Y02_Solda_Select);
+	database_read[Recipe_select_int, 9] := BOOL_TO_STRING (Recipe_P02_Solda_Select);
+	database_read[Recipe_select_int, 10] := LREAL_TO_STRING (Recipe_P_X03_Solda_Select);
+	database_read[Recipe_select_int, 11] := LREAL_TO_STRING (Recipe_P_Y03_Solda_Select);
+	database_read[Recipe_select_int, 12] := BOOL_TO_STRING (Recipe_P03_Solda_Select);
+	database_read[Recipe_select_int, 13] := LREAL_TO_STRING (Recipe_P_X04_Solda_Select);
+	database_read[Recipe_select_int, 14] := LREAL_TO_STRING (Recipe_P_Y04_Solda_Select);
+	database_read[Recipe_select_int, 15] := BOOL_TO_STRING (Recipe_P04_Solda_Select);
+	database_read[Recipe_select_int, 16] := LREAL_TO_STRING (Recipe_P_X05_Solda_Select);
+	database_read[Recipe_select_int, 17] := LREAL_TO_STRING (Recipe_P_Y05_Solda_Select);
+	database_read[Recipe_select_int, 18] := BOOL_TO_STRING (Recipe_P05_Solda_Select);
+	
+	database_read[Recipe_select_int, 19] := LREAL_TO_STRING (Recipe_P_X06_Solda_Select);
+	database_read[Recipe_select_int, 20] := LREAL_TO_STRING (Recipe_P_Y06_Solda_Select);
+	database_read[Recipe_select_int, 21] := BOOL_TO_STRING (Recipe_P06_Solda_Select);
+	database_read[Recipe_select_int, 22] := LREAL_TO_STRING (Recipe_P_X07_Solda_Select);
+	database_read[Recipe_select_int, 23] := LREAL_TO_STRING (Recipe_P_Y07_Solda_Select);
+	database_read[Recipe_select_int, 24] := BOOL_TO_STRING (Recipe_P07_Solda_Select);
+	database_read[Recipe_select_int, 25] := LREAL_TO_STRING (Recipe_P_X08_Solda_Select);
+	database_read[Recipe_select_int, 26] := LREAL_TO_STRING (Recipe_P_Y08_Solda_Select);
+	database_read[Recipe_select_int, 27] := BOOL_TO_STRING (Recipe_P08_Solda_Select);
+	database_read[Recipe_select_int, 28] := LREAL_TO_STRING (Recipe_P_X09_Solda_Select);
+	database_read[Recipe_select_int, 29] := LREAL_TO_STRING (Recipe_P_Y09_Solda_Select);
+	database_read[Recipe_select_int, 30] := BOOL_TO_STRING (Recipe_P09_Solda_Select);
+	database_read[Recipe_select_int, 31] := LREAL_TO_STRING (Recipe_P_X10_Solda_Select);
+	database_read[Recipe_select_int, 32] := LREAL_TO_STRING (Recipe_P_Y10_Solda_Select);
+	database_read[Recipe_select_int, 33] := BOOL_TO_STRING (Recipe_P10_Solda_Select);
+	
+	database_read[Recipe_select_int, 34] := LREAL_TO_STRING (Recipe_P_X11_Solda_Select);
+	database_read[Recipe_select_int, 35] := LREAL_TO_STRING (Recipe_P_Y11_Solda_Select);
+	database_read[Recipe_select_int, 36] := BOOL_TO_STRING (Recipe_P11_Solda_Select);
+	database_read[Recipe_select_int, 37] := LREAL_TO_STRING (Recipe_P_X12_Solda_Select);
+	database_read[Recipe_select_int, 38] := LREAL_TO_STRING (Recipe_P_Y12_Solda_Select);
+	database_read[Recipe_select_int, 39] := BOOL_TO_STRING (Recipe_P12_Solda_Select);
+	database_read[Recipe_select_int, 40] := LREAL_TO_STRING (Recipe_P_X13_Solda_Select);
+	database_read[Recipe_select_int, 41] := LREAL_TO_STRING (Recipe_P_Y13_Solda_Select);
+	database_read[Recipe_select_int, 42] := BOOL_TO_STRING (Recipe_P13_Solda_Select);
+	database_read[Recipe_select_int, 43] := LREAL_TO_STRING (Recipe_P_X14_Solda_Select);
+	database_read[Recipe_select_int, 44] := LREAL_TO_STRING (Recipe_P_Y14_Solda_Select);
+	database_read[Recipe_select_int, 45] := BOOL_TO_STRING (Recipe_P14_Solda_Select);
+	database_read[Recipe_select_int, 46] := LREAL_TO_STRING (Recipe_P_X15_Solda_Select);
+	database_read[Recipe_select_int, 47] := LREAL_TO_STRING (Recipe_P_Y15_Solda_Select);
+	database_read[Recipe_select_int, 48] := BOOL_TO_STRING (Recipe_P15_Solda_Select);
+	
+	database_read[Recipe_select_int, 49] := LREAL_TO_STRING (Recipe_Valvula_Proporcional_Select);
+	
+	database_read[Recipe_select_int, 50] := INT_TO_STRING (Recipe_Pontos_Camera_Select);
+	database_read[Recipe_select_int, 51] := INT_TO_STRING (Recipe_JobID_F01_Camera_Select);
+	database_read[Recipe_select_int, 52] := INT_TO_STRING (Recipe_JobID_F02_Camera_Select);
+	database_read[Recipe_select_int, 53] := INT_TO_STRING (Recipe_JobID_F03_Camera_Select);
+	database_read[Recipe_select_int, 54] := INT_TO_STRING (Recipe_JobID_F04_Camera_Select);
+	database_read[Recipe_select_int, 55] := INT_TO_STRING (Recipe_JobID_F05_Camera_Select);
+	
+	database_read[Recipe_select_int, 56] := INT_TO_STRING (Recipe_Pecas_Caixa_Select);
+	
+	b_salvar_receita := FALSE;
+	b_editar_receita := FALSE;
+	bWrite := TRUE;
+	
+ELSIF	
+	b_editar_receita AND NOT b_deletar_receita AND b_cancelar_receita THEN
+	b_cancelar_receita := FALSE;
+	b_editar_receita := FALSE;
+	
+END_IF
+
+// Criar nova receita
+IF b_criar_receita THEN
+	
+	CASE PassoLimparMemoriasReceita OF
+		
+		0: //Limpar Memórias "Recipe" da Receita
+			
+			Recipe_Name_Select					:= '';
+			Recipe_No_Select					:= 0;
+			Recipe_ID_Select					:= 0;
+				
+			Recipe_Pontos_Solda_Select			:= 0;
+				
+			Recipe_P_X01_Solda_Select			:= 0.0;
+			Recipe_P_Y01_Solda_Select			:= 0.0;
+			Recipe_P01_Solda_Select				:= FALSE;
+			Recipe_P_X02_Solda_Select			:= 0.0;
+			Recipe_P_Y02_Solda_Select			:= 0.0;
+			Recipe_P02_Solda_Select				:= FALSE;	
+			Recipe_P_X03_Solda_Select			:= 0.0;
+			Recipe_P_Y03_Solda_Select			:= 0.0;
+			Recipe_P03_Solda_Select				:= FALSE;
+			Recipe_P_X04_Solda_Select			:= 0.0;
+			Recipe_P_Y04_Solda_Select			:= 0.0;
+			Recipe_P04_Solda_Select				:= FALSE;
+			Recipe_P_X05_Solda_Select			:= 0.0;
+			Recipe_P_Y05_Solda_Select			:= 0.0;
+			Recipe_P05_Solda_Select				:= FALSE;
+			
+			Recipe_P_X06_Solda_Select			:= 0.0;
+			Recipe_P_Y06_Solda_Select			:= 0.0;
+			Recipe_P06_Solda_Select				:= FALSE;
+			Recipe_P_X07_Solda_Select			:= 0.0;
+			Recipe_P_Y07_Solda_Select			:= 0.0;
+			Recipe_P07_Solda_Select				:= FALSE;	
+			Recipe_P_X08_Solda_Select			:= 0.0;
+			Recipe_P_Y08_Solda_Select			:= 0.0;
+			Recipe_P08_Solda_Select				:= FALSE;
+			Recipe_P_X09_Solda_Select			:= 0.0;
+			Recipe_P_Y09_Solda_Select			:= 0.0;
+			Recipe_P09_Solda_Select				:= FALSE;
+			Recipe_P_X10_Solda_Select			:= 0.0;
+			Recipe_P_Y10_Solda_Select			:= 0.0;
+			Recipe_P10_Solda_Select				:= FALSE;
+				
+			Recipe_P_X11_Solda_Select			:= 0.0;
+			Recipe_P_Y11_Solda_Select			:= 0.0;
+			Recipe_P11_Solda_Select				:= FALSE;
+			Recipe_P_X12_Solda_Select			:= 0.0;
+			Recipe_P_Y12_Solda_Select			:= 0.0;
+			Recipe_P12_Solda_Select				:= FALSE;	
+			Recipe_P_X13_Solda_Select			:= 0.0;
+			Recipe_P_Y13_Solda_Select			:= 0.0;
+			Recipe_P13_Solda_Select				:= FALSE;
+			Recipe_P_X14_Solda_Select			:= 0.0;
+			Recipe_P_Y14_Solda_Select			:= 0.0;
+			Recipe_P14_Solda_Select				:= FALSE;
+			Recipe_P_X15_Solda_Select			:= 0.0;
+			Recipe_P_Y15_Solda_Select			:= 0.0;
+			Recipe_P15_Solda_Select				:= FALSE;
+				
+			Recipe_Valvula_Proporcional_Select	:= 0.0;
+			
+			Recipe_Pontos_Camera_Select			:= 0;
+			Recipe_JobID_F01_Camera_Select		:= 0;
+			Recipe_JobID_F01_Camera_Select		:= 0;
+			Recipe_JobID_F01_Camera_Select		:= 0;
+			Recipe_JobID_F01_Camera_Select		:= 0;
+			Recipe_JobID_F01_Camera_Select		:= 0;
+		
+			Recipe_Pecas_Caixa_Select			:= 0;
+			
+			PassoLimparMemoriasReceita := 10;
+	
+	END_CASE
+
+ELSE
+	
+	PassoLimparMemoriasReceita := 0;	
+
+END_IF
+
+IF b_criar_receita AND b_salvar_receita THEN
+	
+	database_read[Item_livre, 0] := Recipe_Name_Select;
+	database_read[Item_livre, 1] := INT_TO_STRING (Recipe_No_Select);
+	database_read[Item_livre, 2] := INT_TO_STRING (Recipe_ID_Select);
+	
+	database_read[Item_livre, 3] := INT_TO_STRING (Recipe_Pontos_Solda_Select);
+	
+	database_read[Item_livre, 4] := LREAL_TO_STRING (Recipe_P_X01_Solda_Select);
+	database_read[Item_livre, 5] := LREAL_TO_STRING (Recipe_P_Y01_Solda_Select);
+	database_read[Item_livre, 6] := BOOL_TO_STRING (Recipe_P01_Solda_Select);
+	database_read[Item_livre, 7] := LREAL_TO_STRING (Recipe_P_X02_Solda_Select);
+	database_read[Item_livre, 8] := LREAL_TO_STRING (Recipe_P_Y02_Solda_Select);
+	database_read[Item_livre, 9] := BOOL_TO_STRING (Recipe_P02_Solda_Select);
+	database_read[Item_livre, 10] := LREAL_TO_STRING (Recipe_P_X03_Solda_Select);
+	database_read[Item_livre, 11] := LREAL_TO_STRING (Recipe_P_Y03_Solda_Select);
+	database_read[Item_livre, 12] := BOOL_TO_STRING (Recipe_P03_Solda_Select);
+	database_read[Item_livre, 13] := LREAL_TO_STRING (Recipe_P_X04_Solda_Select);
+	database_read[Item_livre, 14] := LREAL_TO_STRING (Recipe_P_Y04_Solda_Select);
+	database_read[Item_livre, 15] := BOOL_TO_STRING (Recipe_P04_Solda_Select);
+	database_read[Item_livre, 16] := LREAL_TO_STRING (Recipe_P_X05_Solda_Select);
+	database_read[Item_livre, 17] := LREAL_TO_STRING (Recipe_P_Y05_Solda_Select);
+	database_read[Item_livre, 18] := BOOL_TO_STRING (Recipe_P05_Solda_Select);
+	
+	database_read[Item_livre, 19] := LREAL_TO_STRING (Recipe_P_X06_Solda_Select);
+	database_read[Item_livre, 20] := LREAL_TO_STRING (Recipe_P_Y06_Solda_Select);
+	database_read[Item_livre, 21] := BOOL_TO_STRING (Recipe_P06_Solda_Select);
+	database_read[Item_livre, 22] := LREAL_TO_STRING (Recipe_P_X07_Solda_Select);
+	database_read[Item_livre, 23] := LREAL_TO_STRING (Recipe_P_Y07_Solda_Select);
+	database_read[Item_livre, 24] := BOOL_TO_STRING (Recipe_P07_Solda_Select);
+	database_read[Item_livre, 25] := LREAL_TO_STRING (Recipe_P_X08_Solda_Select);
+	database_read[Item_livre, 26] := LREAL_TO_STRING (Recipe_P_Y08_Solda_Select);
+	database_read[Item_livre, 27] := BOOL_TO_STRING (Recipe_P08_Solda_Select);
+	database_read[Item_livre, 28] := LREAL_TO_STRING (Recipe_P_X09_Solda_Select);
+	database_read[Item_livre, 29] := LREAL_TO_STRING (Recipe_P_Y09_Solda_Select);
+	database_read[Item_livre, 30] := BOOL_TO_STRING (Recipe_P09_Solda_Select);
+	database_read[Item_livre, 31] := LREAL_TO_STRING (Recipe_P_X10_Solda_Select);
+	database_read[Item_livre, 32] := LREAL_TO_STRING (Recipe_P_Y10_Solda_Select);
+	database_read[Item_livre, 33] := BOOL_TO_STRING (Recipe_P10_Solda_Select);
+	
+	database_read[Item_livre, 34] := LREAL_TO_STRING (Recipe_P_X11_Solda_Select);
+	database_read[Item_livre, 35] := LREAL_TO_STRING (Recipe_P_Y11_Solda_Select);
+	database_read[Item_livre, 36] := BOOL_TO_STRING (Recipe_P11_Solda_Select);
+	database_read[Item_livre, 37] := LREAL_TO_STRING (Recipe_P_X12_Solda_Select);
+	database_read[Item_livre, 38] := LREAL_TO_STRING (Recipe_P_Y12_Solda_Select);
+	database_read[Item_livre, 39] := BOOL_TO_STRING (Recipe_P12_Solda_Select);
+	database_read[Item_livre, 40] := LREAL_TO_STRING (Recipe_P_X13_Solda_Select);
+	database_read[Item_livre, 41] := LREAL_TO_STRING (Recipe_P_Y13_Solda_Select);
+	database_read[Item_livre, 42] := BOOL_TO_STRING (Recipe_P13_Solda_Select);
+	database_read[Item_livre, 43] := LREAL_TO_STRING (Recipe_P_X14_Solda_Select);
+	database_read[Item_livre, 44] := LREAL_TO_STRING (Recipe_P_Y14_Solda_Select);
+	database_read[Item_livre, 45] := BOOL_TO_STRING (Recipe_P14_Solda_Select);
+	database_read[Item_livre, 46] := LREAL_TO_STRING (Recipe_P_X15_Solda_Select);
+	database_read[Item_livre, 47] := LREAL_TO_STRING (Recipe_P_Y15_Solda_Select);
+	database_read[Item_livre, 48] := BOOL_TO_STRING (Recipe_P15_Solda_Select);
+	
+	database_read[Item_livre, 49] := LREAL_TO_STRING (Recipe_Valvula_Proporcional_Select);
+	
+	database_read[Item_livre, 50] := INT_TO_STRING (Recipe_Pontos_Camera_Select);
+	database_read[Item_livre, 51] := INT_TO_STRING (Recipe_JobID_F01_Camera_Select);
+	database_read[Item_livre, 52] := INT_TO_STRING (Recipe_JobID_F02_Camera_Select);
+	database_read[Item_livre, 53] := INT_TO_STRING (Recipe_JobID_F03_Camera_Select);
+	database_read[Item_livre, 54] := INT_TO_STRING (Recipe_JobID_F04_Camera_Select);
+	database_read[Item_livre, 55] := INT_TO_STRING (Recipe_JobID_F05_Camera_Select);
+	
+	database_read[Item_livre, 56] := INT_TO_STRING (Recipe_Pecas_Caixa_Select);
+
+	b_salvar_receita := FALSE;
+	b_criar_receita := FALSE;
+	bWrite := TRUE;
+
+ELSIF 	b_criar_receita AND b_cancelar_receita THEN
+	b_criar_receita := FALSE;
+	b_cancelar_receita := FALSE;
+	
+END_IF
+
+(*===================		EXECUTAR RECEITA		======================*)
+
+IF b_executar_receita THEN
+	
+	// := Recipe_Name_Select;
+	// := Recipe_No_Select;
+	// := Recipe_ID_Select;
+	
+	NumPontosSolda := Recipe_Pontos_Solda_Select;
+	
+	TargetX[0] := Recipe_P_X01_Solda_Select;
+	TargetY[0] := Recipe_P_Y01_Solda_Select;
+	SoldaXY[0] := Recipe_P01_Solda_Select;
+	TargetX[1] := Recipe_P_X02_Solda_Select;
+	TargetY[1] := Recipe_P_Y02_Solda_Select;
+	SoldaXY[1] := Recipe_P02_Solda_Select;
+	TargetX[2] := Recipe_P_X03_Solda_Select;
+	TargetY[2] := Recipe_P_Y03_Solda_Select;
+	SoldaXY[2] := Recipe_P03_Solda_Select;
+	TargetX[3] := Recipe_P_X04_Solda_Select;
+	TargetY[3] := Recipe_P_Y04_Solda_Select;
+	SoldaXY[3] := Recipe_P04_Solda_Select;
+	TargetX[4] := Recipe_P_X05_Solda_Select;
+	TargetY[4] := Recipe_P_Y05_Solda_Select;
+	SoldaXY[4] := Recipe_P05_Solda_Select;
+	
+	TargetX[5] := Recipe_P_X06_Solda_Select;
+	TargetY[5] := Recipe_P_Y06_Solda_Select;
+	SoldaXY[5] := Recipe_P06_Solda_Select;
+	TargetX[6] := Recipe_P_X07_Solda_Select;
+	TargetY[6] := Recipe_P_Y07_Solda_Select;
+	SoldaXY[6] := Recipe_P07_Solda_Select;
+	TargetX[7] := Recipe_P_X08_Solda_Select;
+	TargetY[7] := Recipe_P_Y08_Solda_Select;
+	SoldaXY[7] := Recipe_P08_Solda_Select;
+	TargetX[8] := Recipe_P_X09_Solda_Select;
+	TargetY[8] := Recipe_P_Y09_Solda_Select;
+	SoldaXY[8] := Recipe_P09_Solda_Select;
+	TargetX[9] := Recipe_P_X10_Solda_Select;
+	TargetY[9] := Recipe_P_Y10_Solda_Select;
+	SoldaXY[9] := Recipe_P10_Solda_Select;
+	
+	TargetX[10] := Recipe_P_X11_Solda_Select;
+	TargetY[10] := Recipe_P_Y11_Solda_Select;
+	SoldaXY[10] := Recipe_P11_Solda_Select;
+	TargetX[11] := Recipe_P_X12_Solda_Select;
+	TargetY[11] := Recipe_P_Y12_Solda_Select;
+	SoldaXY[11] := Recipe_P12_Solda_Select;
+	TargetX[12] := Recipe_P_X13_Solda_Select;
+	TargetY[12] := Recipe_P_Y13_Solda_Select;
+	SoldaXY[12] := Recipe_P13_Solda_Select;
+	TargetX[13] := Recipe_P_X14_Solda_Select;
+	TargetY[13] := Recipe_P_Y14_Solda_Select;
+	SoldaXY[13] := Recipe_P14_Solda_Select;
+	TargetX[14] := Recipe_P_X15_Solda_Select;
+	TargetY[14] := Recipe_P_Y15_Solda_Select;
+	SoldaXY[14] := Recipe_P15_Solda_Select;
+		
+	// := Recipe_Valvula_Proporcional_Select;
+	
+	// := Recipe_Pontos_Camera_Select;
+	CameraJobID[0] := Recipe_JobID_F01_Camera_Select;
+	CameraJobID[1] := Recipe_JobID_F02_Camera_Select;
+	CameraJobID[2] := Recipe_JobID_F03_Camera_Select;
+	CameraJobID[3] := Recipe_JobID_F04_Camera_Select;
+	CameraJobID[4] := Recipe_JobID_F05_Camera_Select;
+	
+	// := Recipe_Pecas_Caixa_Select;
+	
+	b_executar_receita := FALSE;
+//	ServoTest := TRUE;
+	
+END_IF
+
+(*========================================================================*)]]></ST>
+    </Implementation>
+    <LineIds Name="Main_Receita">
+      <LineId Id="2283" Count="43" />
+      <LineId Id="2843" Count="0" />
+      <LineId Id="2808" Count="0" />
+      <LineId Id="2803" Count="0" />
+      <LineId Id="2809" Count="1" />
+      <LineId Id="2804" Count="1" />
+      <LineId Id="2331" Count="13" />
+      <LineId Id="2811" Count="0" />
+      <LineId Id="2813" Count="13" />
+      <LineId Id="2812" Count="0" />
+      <LineId Id="2827" Count="0" />
+      <LineId Id="2829" Count="13" />
+      <LineId Id="2828" Count="0" />
+      <LineId Id="2345" Count="1" />
+      <LineId Id="2350" Count="0" />
+      <LineId Id="2848" Count="1" />
+      <LineId Id="2846" Count="0" />
+      <LineId Id="2864" Count="2" />
+      <LineId Id="2847" Count="0" />
+      <LineId Id="2845" Count="0" />
+      <LineId Id="2351" Count="0" />
+      <LineId Id="3529" Count="15" />
+      <LineId Id="2385" Count="7" />
+      <LineId Id="2867" Count="0" />
+      <LineId Id="2870" Count="2" />
+      <LineId Id="2933" Count="0" />
+      <LineId Id="2874" Count="11" />
+      <LineId Id="2934" Count="13" />
+      <LineId Id="2900" Count="32" />
+      <LineId Id="2949" Count="1" />
+      <LineId Id="2437" Count="47" />
+      <LineId Id="2990" Count="16" />
+      <LineId Id="2485" Count="55" />
+      <LineId Id="3010" Count="15" />
+      <LineId Id="3009" Count="0" />
+      <LineId Id="2541" Count="43" />
+      <LineId Id="3027" Count="15" />
+      <LineId Id="3026" Count="0" />
+      <LineId Id="2585" Count="23" />
+      <LineId Id="3211" Count="0" />
+      <LineId Id="2609" Count="0" />
+      <LineId Id="3212" Count="0" />
+      <LineId Id="2610" Count="13" />
+      <LineId Id="3213" Count="0" />
+      <LineId Id="3215" Count="13" />
+      <LineId Id="3214" Count="0" />
+      <LineId Id="3229" Count="0" />
+      <LineId Id="3231" Count="13" />
+      <LineId Id="3230" Count="0" />
+      <LineId Id="2624" Count="2" />
+      <LineId Id="3245" Count="0" />
+      <LineId Id="2627" Count="2" />
+      <LineId Id="3247" Count="1" />
+      <LineId Id="2630" Count="0" />
+      <LineId Id="3249" Count="0" />
+      <LineId Id="2647" Count="17" />
+      <LineId Id="2706" Count="0" />
+      <LineId Id="3148" Count="62" />
+      <LineId Id="3147" Count="0" />
+      <LineId Id="2707" Count="11" />
+      <LineId Id="3250" Count="0" />
+      <LineId Id="3313" Count="0" />
+      <LineId Id="3251" Count="61" />
+      <LineId Id="2760" Count="15" />
+      <LineId Id="3314" Count="1" />
+      <LineId Id="3377" Count="0" />
+      <LineId Id="3317" Count="5" />
+      <LineId Id="3379" Count="1" />
+      <LineId Id="3378" Count="0" />
+      <LineId Id="3382" Count="1" />
+      <LineId Id="3381" Count="0" />
+      <LineId Id="3385" Count="1" />
+      <LineId Id="3384" Count="0" />
+      <LineId Id="3388" Count="1" />
+      <LineId Id="3387" Count="0" />
+      <LineId Id="3391" Count="0" />
+      <LineId Id="3427" Count="13" />
+      <LineId Id="3392" Count="0" />
+      <LineId Id="3323" Count="0" />
+      <LineId Id="3469" Count="13" />
+      <LineId Id="3407" Count="0" />
+      <LineId Id="3422" Count="0" />
+      <LineId Id="3368" Count="3" />
+      <LineId Id="3423" Count="3" />
+      <LineId Id="3376" Count="0" />
+      <LineId Id="2796" Count="6" />
+      <LineId Id="23" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

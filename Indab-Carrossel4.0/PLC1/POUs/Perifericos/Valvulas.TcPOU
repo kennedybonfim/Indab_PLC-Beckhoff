@@ -1,0 +1,340 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="Valvulas" Id="{54ed8504-3266-4bd1-b116-5b79c5790bc6}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Valvulas
+VAR
+
+(*=========================		VÁLVULAS		==========================*)	
+
+
+
+(*========================================================================*)
+
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*==============		Válvula Y1 - XXXXXXX XXXXXXX		==============*)
+
+IF (MaquinaModoManual) THEN
+	//Controle Manual - Válvula Y1
+	IF (IhmBt_Y1_Ligar) THEN
+		OutValvulaY1R := FALSE;	//Solenóide de Recuo
+		OutValvulaY1A := TRUE; //Solenóide de Avanço
+	ELSE
+		OutValvulaY1A := FALSE;	//Solenóide de Avanço
+		OutValvulaY1R := TRUE; //Solenóide de Recuo	
+	END_IF
+ELSIF (MaquinaModoAuto) THEN
+	//Controle Automático - Válvula Y1
+	IF (AvancarValvulaY1) THEN
+		OutValvulaY1R := FALSE; //Solenóide de Recuo
+		OutValvulaY1A := TRUE;	//Solenóide de Avanço
+	ELSE
+		OutValvulaY1A := FALSE; //Solenóide de Avanço
+		OutValvulaY1R := TRUE;	//Solenóide de Recuo
+	END_IF
+ELSE
+	OutValvulaY1R := FALSE; //Solenóide de Recuo
+	OutValvulaY1A := FALSE;	//Solenóide de Avanço
+END_IF
+
+(*========================================================================*)
+
+(*==============		Válvula Y2 - XXXXXXX XXXXXXX		==============*)
+
+IF (MaquinaModoManual) THEN
+	//Controle Manual - Válvula Y2
+	IF (IhmBt_Y2_Ligar) THEN
+		OutValvulaY2R := FALSE;	//Solenóide de Recuo
+		OutValvulaY2A := TRUE; //Solenóide de Avanço
+	ELSE
+		OutValvulaY2A := FALSE;	//Solenóide de Avanço
+		OutValvulaY2R := TRUE; //Solenóide de Recuo	
+	END_IF
+ELSIF (MaquinaModoAuto) THEN
+	//Controle Automático - Válvula Y2
+	IF (AvancarValvulaY2) THEN
+		OutValvulaY2R := FALSE; //Solenóide de Recuo
+		OutValvulaY2A := TRUE;	//Solenóide de Avanço
+	ELSE
+		OutValvulaY2A := FALSE; //Solenóide de Avanço
+		OutValvulaY2R := TRUE;	//Solenóide de Recuo
+	END_IF
+ELSE
+	OutValvulaY2R := FALSE; //Solenóide de Recuo
+	OutValvulaY2A := FALSE;	//Solenóide de Avanço
+END_IF
+
+(*========================================================================*)
+
+(*==============		Válvula Y3 - XXXXXXX XXXXXXX		==============*)
+
+IF (MaquinaModoManual) THEN
+	//Controle Manual - Válvula Y3
+	IF (IhmBt_Y3_Ligar) THEN
+		OutValvulaY3R := FALSE;	//Solenóide de Recuo
+		OutValvulaY3A := TRUE; //Solenóide de Avanço
+	ELSE
+		OutValvulaY3A := FALSE;	//Solenóide de Avanço
+		OutValvulaY3R := TRUE; //Solenóide de Recuo	
+	END_IF
+ELSIF (MaquinaModoAuto) THEN
+	//Controle Automático - Válvula Y3
+	IF (AvancarValvulaY3) THEN
+		OutValvulaY3R := FALSE; //Solenóide de Recuo
+		OutValvulaY3A := TRUE;	//Solenóide de Avanço
+	ELSE
+		OutValvulaY3A := FALSE; //Solenóide de Avanço
+		OutValvulaY3R := TRUE;	//Solenóide de Recuo
+	END_IF
+ELSE
+	OutValvulaY3R := FALSE; //Solenóide de Recuo
+	OutValvulaY3A := FALSE;	//Solenóide de Avanço
+END_IF
+
+(*========================================================================*)
+
+(*==============		Válvula Y4 - XXXXXXX XXXXXXX		==============*)
+
+IF (MaquinaModoManual) THEN
+	//Controle Manual - Válvula Y4
+	IF (IhmBt_Y4_Ligar) THEN
+		OutValvulaY4R := FALSE;	//Solenóide de Recuo
+		OutValvulaY4A := TRUE; //Solenóide de Avanço
+	ELSE
+		OutValvulaY4A := FALSE;	//Solenóide de Avanço
+		OutValvulaY4R := TRUE; //Solenóide de Recuo	
+	END_IF
+ELSIF (MaquinaModoAuto) THEN
+	//Controle Automático - Válvula Y4
+	IF (AvancarValvulaY4) THEN
+		OutValvulaY4R := FALSE; //Solenóide de Recuo
+		OutValvulaY4A := TRUE;	//Solenóide de Avanço
+	ELSE
+		OutValvulaY4A := FALSE; //Solenóide de Avanço
+		OutValvulaY4R := TRUE;	//Solenóide de Recuo
+	END_IF
+ELSE
+	OutValvulaY4R := FALSE; //Solenóide de Recuo
+	OutValvulaY4A := FALSE;	//Solenóide de Avanço
+END_IF
+
+(*========================================================================*)
+
+(*==============		Válvula Y5 - XXXXXXX XXXXXXX		==============*)
+
+IF (MaquinaModoManual) THEN
+	//Controle Manual - Válvula Y5
+	IF (IhmBt_Y5_Ligar) THEN
+		OutValvulaY5R := FALSE;	//Solenóide de Recuo
+		OutValvulaY5A := TRUE; //Solenóide de Avanço
+	ELSE
+		OutValvulaY5A := FALSE;	//Solenóide de Avanço
+		OutValvulaY5R := TRUE; //Solenóide de Recuo	
+	END_IF
+ELSIF (MaquinaModoAuto) THEN
+	//Controle Automático - Válvula Y5
+	IF (AvancarValvulaY5) THEN
+		OutValvulaY5R := FALSE; //Solenóide de Recuo
+		OutValvulaY5A := TRUE;	//Solenóide de Avanço
+	ELSE
+		OutValvulaY5A := FALSE; //Solenóide de Avanço
+		OutValvulaY5R := TRUE;	//Solenóide de Recuo
+	END_IF
+ELSE
+	OutValvulaY5R := FALSE; //Solenóide de Recuo
+	OutValvulaY5A := FALSE;	//Solenóide de Avanço
+END_IF
+
+(*========================================================================*)
+
+(*==============		Válvula Y6 - XXXXXXX XXXXXXX		==============*)
+
+IF (MaquinaModoManual) THEN
+	//Controle Manual - Válvula Y6
+	IF (IhmBt_Y6_Ligar) THEN
+		OutValvulaY6 := TRUE;
+	ELSE
+		OutValvulaY6 := FALSE;
+	END_IF
+ELSIF (MaquinaModoAuto) THEN
+	//Controle Automático - Válvula Y6
+	IF (LigarValvulaY6) THEN
+		OutValvulaY6 := TRUE;
+	ELSE
+		OutValvulaY6 := FALSE;
+	END_IF
+ELSE
+	OutValvulaY6 := FALSE;
+END_IF
+
+(*========================================================================*)
+
+(*==============		Válvula Y9 - XXXXXXX XXXXXXX		==============*)
+
+IF (MaquinaModoManual) THEN
+	//Controle Manual - Válvula Y9
+	IF (IhmBt_Y9_Ligar) THEN
+		OutValvulaY9 := TRUE;
+	ELSE
+		OutValvulaY9 := FALSE;
+	END_IF
+ELSIF (MaquinaModoAuto) THEN
+	//Controle Automático - Válvula Y9
+	IF (LigarValvulaY9) THEN
+		OutValvulaY9 := TRUE;
+	ELSE
+		OutValvulaY9 := FALSE;
+	END_IF
+ELSE
+	OutValvulaY9 := FALSE;
+END_IF
+
+(*========================================================================*)
+
+(*==========		Válvula Proporcional - XXXXXXX XXXXXXX		==========*)
+
+IF (MaquinaModoManual) THEN
+	//Controle Manual - Válvula Proporcional
+	IF (IhmBt_VP_Teste) THEN
+		ValvulaProporcional := (INT_TO_REAL(IhmEscr_ValvulaProporcional)/100)*(32767);
+	END_IF
+ELSIF (MaquinaModoAuto) THEN
+	//Controle Automático - Válvula Proporcional
+	ValvulaProporcional := (INT_TO_REAL(50)/100)*(32767);
+ELSE
+	ValvulaProporcional := 0;
+END_IF
+	
+(*========================================================================*)
+
+(*=============		Válvula Y7 - Válvula de Segurança 1		==============*)
+
+//Controle Automático - Válvula Y7
+IF (NOT Alarmes.AlarmeGrave) THEN
+	LigarValvulaY7 := TRUE;
+ELSE
+	LigarValvulaY7 := FALSE;
+END_IF
+
+//Válvula Y7 - XXXXX XXXXX
+IF (LigarValvulaY7) THEN
+	OutValvulaY7 := TRUE;
+ELSE
+	OutValvulaY7 := FALSE;
+END_IF
+
+(*========================================================================*) 
+
+(*=============		Válvula Y8 - Válvula de Segurança 2		==============*)
+
+//Controle Automático - Válvula Y8
+IF (NOT Alarmes.AlarmeGrave) THEN
+	LigarValvulaY8 := TRUE;
+ELSE
+	LigarValvulaY8 := FALSE;
+END_IF
+
+//Válvula Y8 - XXXXX XXXXX
+IF (LigarValvulaY8) THEN
+	OutValvulaY8 := TRUE;
+ELSE
+	OutValvulaY8 := FALSE;
+END_IF
+
+(*========================================================================*) ]]></ST>
+    </Implementation>
+    <LineIds Name="Valvulas">
+      <LineId Id="5" Count="0" />
+      <LineId Id="773" Count="0" />
+      <LineId Id="278" Count="0" />
+      <LineId Id="777" Count="1" />
+      <LineId Id="780" Count="0" />
+      <LineId Id="931" Count="0" />
+      <LineId Id="784" Count="0" />
+      <LineId Id="932" Count="0" />
+      <LineId Id="785" Count="0" />
+      <LineId Id="787" Count="0" />
+      <LineId Id="794" Count="0" />
+      <LineId Id="797" Count="3" />
+      <LineId Id="804" Count="2" />
+      <LineId Id="796" Count="0" />
+      <LineId Id="807" Count="2" />
+      <LineId Id="776" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="46" Count="1" />
+      <LineId Id="410" Count="0" />
+      <LineId Id="933" Count="20" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="424" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="334" Count="0" />
+      <LineId Id="954" Count="20" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="439" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="108" Count="1" />
+      <LineId Id="335" Count="0" />
+      <LineId Id="975" Count="20" />
+      <LineId Id="454" Count="0" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="169" Count="0" />
+      <LineId Id="349" Count="0" />
+      <LineId Id="1008" Count="20" />
+      <LineId Id="197" Count="0" />
+      <LineId Id="469" Count="0" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="199" Count="1" />
+      <LineId Id="363" Count="0" />
+      <LineId Id="1030" Count="3" />
+      <LineId Id="1035" Count="1" />
+      <LineId Id="1038" Count="4" />
+      <LineId Id="1044" Count="0" />
+      <LineId Id="1051" Count="0" />
+      <LineId Id="1047" Count="1" />
+      <LineId Id="1050" Count="0" />
+      <LineId Id="484" Count="0" />
+      <LineId Id="1029" Count="0" />
+      <LineId Id="198" Count="0" />
+      <LineId Id="584" Count="0" />
+      <LineId Id="575" Count="1" />
+      <LineId Id="1052" Count="15" />
+      <LineId Id="583" Count="0" />
+      <LineId Id="1068" Count="0" />
+      <LineId Id="574" Count="0" />
+      <LineId Id="595" Count="1" />
+      <LineId Id="598" Count="1" />
+      <LineId Id="1069" Count="0" />
+      <LineId Id="608" Count="1" />
+      <LineId Id="612" Count="0" />
+      <LineId Id="1070" Count="1" />
+      <LineId Id="1073" Count="0" />
+      <LineId Id="613" Count="1" />
+      <LineId Id="607" Count="0" />
+      <LineId Id="604" Count="0" />
+      <LineId Id="594" Count="0" />
+      <LineId Id="230" Count="1" />
+      <LineId Id="539" Count="0" />
+      <LineId Id="541" Count="4" />
+      <LineId Id="540" Count="0" />
+      <LineId Id="377" Count="0" />
+      <LineId Id="1083" Count="4" />
+      <LineId Id="499" Count="0" />
+      <LineId Id="1094" Count="0" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="521" Count="1" />
+      <LineId Id="546" Count="0" />
+      <LineId Id="548" Count="4" />
+      <LineId Id="547" Count="0" />
+      <LineId Id="523" Count="0" />
+      <LineId Id="1088" Count="4" />
+      <LineId Id="529" Count="0" />
+      <LineId Id="1093" Count="0" />
+      <LineId Id="520" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,378 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="Robo" Id="{e004e0b5-246e-4aa6-a72b-20303a4c1dcb}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Robo
+VAR
+
+	BT_test						: BOOL;
+	TON_DelayTesteExpPeca		: TON;
+	
+	//index						: INT;
+
+(*=====================		ROBO YASKAWA		==========================*)	
+ 
+ PassoRoboAuto				: INT;
+ 
+ Flag_PLC_Robot_WorkHome		: BOOL; //Retonar a para a posição WORK HOME (Ordem PLC)
+ Flag_PLC_Robot_PegarPeca		: BOOL; //Pegar Peça na Mesa Indexadora (Ordem PLC)
+ Flag_PLC_Robot_Camera			: BOOL; //Levar Peça Até a Câmera (Ordem PLC)
+ Flag_PLC_Robot_CapturarImagens	: BOOL;
+ Flag_PLC_Robot_Aprovada		: BOOL; //Levar Peça Até a Caixa - Aprovada (Ordem PLC)
+ Flag_PLC_Robot_Reprovada		: BOOL; //Descartar Peça (Ordem PLC)
+ 
+ Flag_Robot_PLC_WorkHome		: BOOL; //Retonar a para a posição WORK HOME (Conclusão Robô)
+ Flag_Robot_PLC_PegarPeca		: BOOL; //Pegar Peça na Mesa Indexadora (Conclusão Robô)
+ Flag_Robot_PLC_Camera			: BOOL; //Levar Peça Até a Câmera (Conclusão Robô)
+ Flag_Robot_PLC_CapturarImagens	: BOOL;
+ Flag_Robot_PLC_Aprovada		: BOOL; //Levar Peça Até a Caixa - Aprovada (Conclusão Robô)
+ Flag_Robot_PLC_Reprovada		: BOOL; //Descartar Peça (Conclusão Robô)
+
+(*========================================================================*)
+
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*==========		Robô Yaskawa Comunicação Ethernet/IP		==========*)
+
+//PLC to Robot -> Byte 0
+
+PLC_Robot_0.0 := Robot_CallMasterJob;
+PLC_Robot_0.1 := Robot_ServoOn;
+PLC_Robot_0.2 := Robot_ServoOff;
+PLC_Robot_0.3 := Robot_ExtStart;
+PLC_Robot_0.4 := Robot_ResetAlarm;
+
+//PLC_Robot_0.4 := Robot_JobBegin;
+
+//PLC to Robot -> Byte 1
+
+PLC_Robot_1.0 := Robot_JobCamera;
+
+//PLC to Robot -> Byte 2
+
+PLC_Robot_3 := 1; //Receita
+
+
+
+Robot_NotSafetyPosition := Robot_PLC_0.3;
+Robot_JobCompleted := Robot_PLC_1.0;
+
+//Robot_Home:= Robot_PLC_1.0;
+
+Robot_Peca	:= Robot_PLC_2.0;
+Robot_Foto1	:= Robot_PLC_2.1;
+Robot_Foto2	:= Robot_PLC_2.2;
+
+
+Robot_HomePosition 	:= Robot_PLC_1.0;
+Robot_TopMasterJob	:= Robot_PLC_1.1;
+Robot_AlarmStatus 	:= Robot_PLC_1.2;
+
+
+
+
+Robot_JobCamera := TRUE;
+
+//Robot_PLC_1.0 := Valvula
+
+
+(*=========================		Modo Manual		==========================*)
+
+ PLC_Robot_2.0 := Flag_PLC_Robot_PegarPeca;
+ PLC_Robot_2.1 := Flag_PLC_Robot_Camera;
+ PLC_Robot_2.2 := Flag_PLC_Robot_CapturarImagens;
+ PLC_Robot_2.3 := Flag_PLC_Robot_Aprovada;
+ PLC_Robot_2.4 := Flag_PLC_Robot_Reprovada;
+ PLC_Robot_2.5 := Flag_PLC_Robot_WorkHome;
+ 
+ Flag_Robot_PLC_PegarPeca 		:= Robot_PLC_2.0;
+ Flag_Robot_PLC_Camera 			:= Robot_PLC_2.1;
+ Flag_Robot_PLC_CapturarImagens := Robot_PLC_2.2;
+ Flag_Robot_PLC_Aprovada 		:= Robot_PLC_2.3;
+ Flag_Robot_PLC_Reprovada 		:= Robot_PLC_2.4;
+ Flag_Robot_PLC_WorkHome 		:= Robot_PLC_2.5;
+ 
+(*======================		Modo Automático		======================*)
+
+//Condição de Bloqueio da Máquina de Estados - Robô Yaskawa
+IF (Alarmes.AlarmeGrave
+	//OR NOT Alarmes.AlarmeMedio
+	//OR NOT MaquinaLigada
+	//OR NOT MaquinaModoAuto
+	) THEN
+	PassoRoboAuto := 1000;
+	Camera_indexJob := 0;
+END_IF
+
+CASE PassoRoboAuto OF
+	
+	//Passo 0 - Inicialização	
+	0: PassoRoboAuto := 10;
+	   
+	//Passo 10 - Condição para Iniciar a Rotina do Robo
+	10: IF (Flag_Maquina_Robo) THEN
+				Flag_Maquina_Robo := FALSE;
+			PassoRoboAuto := 20;
+		END_IF
+		
+	//Passo 20 - Verifica Posição do Robo
+	20: IF (Robot_HomePosition) THEN
+			PassoRoboAuto := 30;
+		END_IF
+		
+	//Passo 30 - Verificar Flag Posição
+	30:	IF (Flag_Robot_PLC_WorkHome) THEN
+			PassoRoboAuto := 40;
+		END_IF
+			
+	//Passo 40 - Iniciar Ciclo - Pegar Peça no Mesa Index
+	40: Flag_PLC_Robot_PegarPeca := TRUE;
+		IF (Flag_Robot_PLC_PegarPeca) THEN
+			Flag_PLC_Robot_PegarPeca := FALSE;
+			PassoRoboAuto := 50;	
+		END_IF
+		
+	//Passo 50 - Levar Peça até a Câmera SICK 
+	50: Flag_PLC_Robot_Camera := TRUE;
+		IF (Flag_Robot_PLC_Camera) THEN
+			Flag_PLC_Robot_Camera := FALSE;
+			PassoRoboAuto := 60;	
+		END_IF
+			
+	//Passo 60 - Sinalizar Captura de Imagens
+	60: Flag_PLC_Robot_CapturarImagens := TRUE;
+		IF (NOT Flag_Robot_PLC_Camera) THEN
+			Flag_PLC_Robot_CapturarImagens := FALSE;
+			PassoRoboAuto := 70;	
+		END_IF
+		
+	//Passo 70 - Capturar Imagens
+	70: Flag_Robo_Camera := TRUE;
+		PassoRoboAuto := 80;
+	
+	//Passo 80 - Aguardar Conclusão da Capturar Imagens
+	80: IF (Flag_Camera_Robo) THEN
+			Flag_Camera_Robo := FALSE;
+			PassoRoboAuto := 90;	
+		END_IF	
+			
+	//Passo 90 - Avaliar Resultado da Câmera
+	90: IF(PecaAprovada) THEN
+			PecaAprovada := FALSE;
+			PassoRoboAuto := 100;
+		ELSE
+			Camera_indexJob := 0;
+			PassoRoboAuto := 120;
+		END_IF
+
+	//Passo 100 - Validar próximo ponto	
+	100: IF (Camera_indexJob + 1 < NumPontosCamera) THEN
+			Camera_indexJob := Camera_indexJob + 1;
+			PassoRoboAuto := 50;
+		ELSE
+			Camera_indexJob := 0;
+			PassoRoboAuto := 100;
+		END_IF
+	
+	
+	//Passo 100 - Depositar a Peça Aprovada na Caixa 
+	110: Flag_PLC_Robot_Aprovada := TRUE;
+		IF (Flag_Robot_PLC_Aprovada) THEN
+			Flag_PLC_Robot_Aprovada := FALSE;
+			
+			//Expelir Peça da Garra
+			AvancarValvulaY1 := TRUE;
+			TON_DelayTesteExpPeca(IN := TRUE, PT := T#3S);
+			IF (TON_DelayTesteExpPeca.Q) THEN
+				TON_DelayTesteExpPeca(IN := FALSE);
+				AvancarValvulaY1 := FALSE;
+				PassoRoboAuto := 115;	
+			END_IF
+
+		END_IF
+	
+	//Passo 115 - Atualizar Contador de Peças Aprovadas
+	115: Contador_PecasAprovadas := Contador_PecasAprovadas + 1;
+		PassoRoboAuto := 130; 
+		
+	//Passo 120 - Descartar a Peça Reprovada 
+	120: Flag_PLC_Robot_Reprovada := TRUE;
+		IF (Flag_Robot_PLC_Reprovada) THEN
+			Flag_PLC_Robot_Reprovada := FALSE;
+			
+			//Expelir Peça da Garra
+			AvancarValvulaY1 := TRUE;
+			TON_DelayTesteExpPeca(IN := TRUE, PT := T#3S);
+			IF (TON_DelayTesteExpPeca.Q) THEN
+				TON_DelayTesteExpPeca(IN := FALSE);
+				AvancarValvulaY1 := FALSE;
+				PassoRoboAuto := 125;
+			END_IF
+			
+		END_IF
+		
+	//Passo 125 - Atualizar Contador de Peças Reprovadas
+	125: Contador_PecasReprovadas := Contador_PecasReprovadas + 1;
+		PassoRoboAuto := 130; 
+	
+	//Passo 130 - Atualizar Contador Total
+	130: Contador_Total := Contador_PecasAprovadas + Contador_PecasReprovadas;
+		PassoRoboAuto := 140; 
+	
+	//Passo 140 - Retornar a Posição WORK HOME 
+	140: Flag_PLC_Robot_WorkHome := TRUE;
+		IF (Flag_Robot_PLC_WorkHome) THEN
+			Flag_PLC_Robot_WorkHome := FALSE;
+			PassoRoboAuto := 150;	
+		END_IF
+		
+	//Passo 150 - Sinalizar Conclusão da Rotina 
+	150: Flag_Robo_Maquina := TRUE;
+		PassoRoboAuto := 1000;
+
+	//Passo 1000 - Finalização
+	1000: PassoRoboAuto := 0;
+	
+END_CASE
+
+(*========================================================================*)]]></ST>
+    </Implementation>
+    <LineIds Name="Robo">
+      <LineId Id="374" Count="0" />
+      <LineId Id="1502" Count="0" />
+      <LineId Id="1501" Count="0" />
+      <LineId Id="1349" Count="1" />
+      <LineId Id="1357" Count="0" />
+      <LineId Id="1631" Count="0" />
+      <LineId Id="1359" Count="0" />
+      <LineId Id="1632" Count="0" />
+      <LineId Id="1400" Count="0" />
+      <LineId Id="1399" Count="0" />
+      <LineId Id="1503" Count="1" />
+      <LineId Id="1506" Count="0" />
+      <LineId Id="1505" Count="0" />
+      <LineId Id="1508" Count="0" />
+      <LineId Id="1507" Count="0" />
+      <LineId Id="1510" Count="0" />
+      <LineId Id="1509" Count="0" />
+      <LineId Id="1512" Count="0" />
+      <LineId Id="1511" Count="0" />
+      <LineId Id="1396" Count="0" />
+      <LineId Id="1395" Count="0" />
+      <LineId Id="1397" Count="1" />
+      <LineId Id="1389" Count="0" />
+      <LineId Id="1419" Count="0" />
+      <LineId Id="1418" Count="0" />
+      <LineId Id="1420" Count="1" />
+      <LineId Id="1450" Count="0" />
+      <LineId Id="1633" Count="0" />
+      <LineId Id="1449" Count="0" />
+      <LineId Id="1635" Count="1" />
+      <LineId Id="1634" Count="0" />
+      <LineId Id="1456" Count="0" />
+      <LineId Id="1455" Count="0" />
+      <LineId Id="1458" Count="0" />
+      <LineId Id="1457" Count="0" />
+      <LineId Id="1460" Count="0" />
+      <LineId Id="1459" Count="0" />
+      <LineId Id="1388" Count="0" />
+      <LineId Id="1348" Count="0" />
+      <LineId Id="1273" Count="0" />
+      <LineId Id="1630" Count="0" />
+      <LineId Id="1611" Count="4" />
+      <LineId Id="1622" Count="1" />
+      <LineId Id="1625" Count="4" />
+      <LineId Id="1624" Count="0" />
+      <LineId Id="1616" Count="0" />
+      <LineId Id="940" Count="0" />
+      <LineId Id="948" Count="7" />
+      <LineId Id="1672" Count="0" />
+      <LineId Id="956" Count="5" />
+      <LineId Id="1122" Count="0" />
+      <LineId Id="963" Count="4" />
+      <LineId Id="1401" Count="2" />
+      <LineId Id="1406" Count="1" />
+      <LineId Id="1209" Count="0" />
+      <LineId Id="1211" Count="0" />
+      <LineId Id="1216" Count="0" />
+      <LineId Id="1662" Count="1" />
+      <LineId Id="1514" Count="0" />
+      <LineId Id="1366" Count="1" />
+      <LineId Id="1664" Count="1" />
+      <LineId Id="1667" Count="0" />
+      <LineId Id="1666" Count="0" />
+      <LineId Id="1368" Count="0" />
+      <LineId Id="969" Count="1" />
+      <LineId Id="1180" Count="0" />
+      <LineId Id="1183" Count="0" />
+      <LineId Id="1181" Count="1" />
+      <LineId Id="973" Count="0" />
+      <LineId Id="1184" Count="1" />
+      <LineId Id="1725" Count="0" />
+      <LineId Id="1733" Count="0" />
+      <LineId Id="1726" Count="1" />
+      <LineId Id="1752" Count="1" />
+      <LineId Id="1732" Count="0" />
+      <LineId Id="1735" Count="0" />
+      <LineId Id="1714" Count="0" />
+      <LineId Id="1717" Count="1" />
+      <LineId Id="1722" Count="1" />
+      <LineId Id="1716" Count="0" />
+      <LineId Id="1715" Count="0" />
+      <LineId Id="1566" Count="0" />
+      <LineId Id="1709" Count="0" />
+      <LineId Id="1568" Count="0" />
+      <LineId Id="1710" Count="0" />
+      <LineId Id="1570" Count="0" />
+      <LineId Id="1707" Count="0" />
+      <LineId Id="1571" Count="0" />
+      <LineId Id="1569" Count="0" />
+      <LineId Id="1573" Count="0" />
+      <LineId Id="1189" Count="0" />
+      <LineId Id="1572" Count="0" />
+      <LineId Id="1576" Count="0" />
+      <LineId Id="1578" Count="1" />
+      <LineId Id="1581" Count="0" />
+      <LineId Id="1580" Count="0" />
+      <LineId Id="1577" Count="0" />
+      <LineId Id="1574" Count="1" />
+      <LineId Id="1191" Count="3" />
+      <LineId Id="1676" Count="0" />
+      <LineId Id="1687" Count="0" />
+      <LineId Id="1679" Count="0" />
+      <LineId Id="1677" Count="0" />
+      <LineId Id="1681" Count="1" />
+      <LineId Id="1684" Count="0" />
+      <LineId Id="1749" Count="0" />
+      <LineId Id="1683" Count="0" />
+      <LineId Id="1686" Count="0" />
+      <LineId Id="1757" Count="0" />
+      <LineId Id="1085" Count="0" />
+      <LineId Id="1762" Count="0" />
+      <LineId Id="1764" Count="1" />
+      <LineId Id="1763" Count="0" />
+      <LineId Id="1197" Count="3" />
+      <LineId Id="1688" Count="0" />
+      <LineId Id="1693" Count="5" />
+      <LineId Id="1705" Count="0" />
+      <LineId Id="1689" Count="0" />
+      <LineId Id="1703" Count="0" />
+      <LineId Id="1702" Count="0" />
+      <LineId Id="1766" Count="0" />
+      <LineId Id="1768" Count="1" />
+      <LineId Id="1767" Count="0" />
+      <LineId Id="1202" Count="0" />
+      <LineId Id="1770" Count="1" />
+      <LineId Id="1761" Count="0" />
+      <LineId Id="1760" Count="0" />
+      <LineId Id="1204" Count="4" />
+      <LineId Id="1203" Count="0" />
+      <LineId Id="1736" Count="0" />
+      <LineId Id="1738" Count="1" />
+      <LineId Id="1744" Count="0" />
+      <LineId Id="1035" Count="0" />
+      <LineId Id="1076" Count="3" />
+      <LineId Id="454" Count="0" />
+      <LineId Id="155" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

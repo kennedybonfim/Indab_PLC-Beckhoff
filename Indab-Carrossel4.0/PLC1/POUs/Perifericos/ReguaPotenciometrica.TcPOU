@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="ReguaPotenciometrica" Id="{7829ac71-f509-4eef-8e29-a9e716f6f108}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM ReguaPotenciometrica
+VAR
+	
+(*==================		RÉGUA POTENCIOMÉTRICA		==================*)	
+ 
+
+ 
+(*========================================================================*)
+
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*==========		Régua Potênciométrica - EL3004 - 15 bits	==========*)
+
+ReguaPotenciometricaPosicao := (INT_TO_REAL(ReguaPotenciometricaSinal)/32787)*100;
+
+(*=========================		Calibração		==========================*)
+
+IF (MaquinaModoManual) THEN
+
+	IF (IhmBt_ReguaPotenciometrica_CalibrarRecuo) THEN
+		ReguaPotenciometrica_Recuada := (INT_TO_REAL(ReguaPotenciometricaSinal)/32787)*100;
+		ReguaPotenciometrica_Recuada_LI := (1-(IhmEscr_ReguaPotenciometrica_ToleranciaRecuo/100))*ReguaPotenciometrica_Recuada;
+		ReguaPotenciometrica_Recuada_LS := (1+(IhmEscr_ReguaPotenciometrica_ToleranciaRecuo/100))*ReguaPotenciometrica_Recuada;
+	END_IF
+	
+	IF (IhmBt_ReguaPotenciometrica_CalibrarPorca) THEN
+		ReguaPotenciometrica_Porca := (INT_TO_REAL(ReguaPotenciometricaSinal)/32787)*100;
+		ReguaPotenciometrica_Porca_LI := (1-(IhmEscr_ReguaPotenciometrica_ToleranciaPorca/100))*ReguaPotenciometrica_Porca;
+		ReguaPotenciometrica_Porca_LS := (1+(IhmEscr_ReguaPotenciometrica_ToleranciaPorca/100))*ReguaPotenciometrica_Porca;
+	END_IF
+	
+	IF (IhmBt_ReguaPotenciometrica_CalibrarAvanco) THEN
+		ReguaPotenciometrica_Avancada := (INT_TO_REAL(ReguaPotenciometricaSinal)/32787)*100;
+		ReguaPotenciometrica_Avancada_LI := (1-(IhmEscr_ReguaPotenciometrica_ToleranciaAvanco/100))*ReguaPotenciometrica_Avancada;
+		ReguaPotenciometrica_Avancada_LS := (1+(IhmEscr_ReguaPotenciometrica_ToleranciaAvanco/100))*ReguaPotenciometrica_Avancada;
+	END_IF
+	
+END_IF
+
+(*======================		Modo Automático		======================*)
+
+
+(*========================================================================*)]]></ST>
+    </Implementation>
+    <LineIds Name="ReguaPotenciometrica">
+      <LineId Id="374" Count="0" />
+      <LineId Id="1357" Count="0" />
+      <LineId Id="1356" Count="0" />
+      <LineId Id="1208" Count="1" />
+      <LineId Id="1377" Count="0" />
+      <LineId Id="1359" Count="0" />
+      <LineId Id="1397" Count="0" />
+      <LineId Id="1380" Count="16" />
+      <LineId Id="1378" Count="1" />
+      <LineId Id="939" Count="1" />
+      <LineId Id="948" Count="0" />
+      <LineId Id="454" Count="0" />
+      <LineId Id="155" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,15 @@
+
+{
+	"UpdateRate": 200,
+	"PlcAddress": "851",
+	"UseLocalHost": true,
+	"Application": "Port_851",
+	"StartVisu": "Tela_Producao",
+	"BestFit": true,
+	"LogLevel": "INFO",
+	"CommBufferSize": 50000,
+    "HasKeyboard": true,
+    "TouchHandlingActive": false,
+    "ScaleTypeIsotropic": true,
+    "BestFitForDialogs": true
+}

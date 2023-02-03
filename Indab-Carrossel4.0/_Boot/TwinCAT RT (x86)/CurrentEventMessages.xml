@@ -1,0 +1,148 @@
+<?xml version="1.0"?>
+<TcEventSources Version="2">
+	<Source>
+		<GUID>{28111931-0002-0000-5230-FC1900001100}</GUID>
+		<Name LcId="1031">EL6652 EtherNet/IP Scanner (Master)</Name>
+		<Name LcId="1033">EL6652 EtherNet/IP Scanner (Master)</Name>
+		<Event>
+			<Id>4096</Id>
+			<Message LcId="1033">EtherCAT {0}</Message>
+		</Event>
+		<Event>
+			<Id>4114</Id>
+			<Message LcId="1033">EtherCAT state change Init - PreOp</Message>
+		</Event>
+		<Event>
+			<Id>4129</Id>
+			<Message LcId="1033">EtherCAT state change PreOp - Init</Message>
+		</Event>
+		<Event>
+			<Id>4132</Id>
+			<Message LcId="1033">EtherCAT state change PreOp - Safe-Op</Message>
+		</Event>
+		<Event>
+			<Id>4162</Id>
+			<Message LcId="1033">EtherCAT state change SafeOp - PreOp</Message>
+		</Event>
+		<Event>
+			<Id>4168</Id>
+			<Message LcId="1033">EtherCAT state change SafeOp - Op</Message>
+		</Event>
+		<Event>
+			<Id>4228</Id>
+			<Message LcId="1033">EtherCAT state change Op - SafeOp</Message>
+		</Event>
+		<Event>
+			<Id>8192</Id>
+			<Message LcId="1033">{0}: {1}</Message>
+		</Event>
+		<Event>
+			<Id>8193</Id>
+			<Message LcId="1033">{0}: Network link lost</Message>
+		</Event>
+		<Event>
+			<Id>8194</Id>
+			<Message LcId="1033">{0}: Network link detected</Message>
+		</Event>
+		<Event>
+			<Id>8195</Id>
+			<Message LcId="1033">{0}: no valid IP Configuration - Dhcp client started</Message>
+		</Event>
+		<Event>
+			<Id>8196</Id>
+			<Message LcId="1033">{0}: valid IP Configuration (IP: {1}.{2}.{3}.{4}) assigned by Dhcp server {5}.{6}.{7}.{8}</Message>
+		</Event>
+		<Event>
+			<Id>8197</Id>
+			<Message LcId="1033">{0}: Dhcp client timed out</Message>
+		</Event>
+		<Event>
+			<Id>8198</Id>
+			<Message LcId="1033">{0}: Duplicate IP Address detected ({1}.{2}.{3}.{4})</Message>
+		</Event>
+		<Event>
+			<Id>8199</Id>
+			<Message LcId="1033">{0}: UDP handler initialized</Message>
+		</Event>
+		<Event>
+			<Id>8200</Id>
+			<Message LcId="1033">{0}: TCP handler initialized</Message>
+		</Event>
+		<Event>
+			<Id>8201</Id>
+			<Message LcId="1033">{0}: No more free TCP sockets available</Message>
+		</Event>
+		<Event>
+			<Id>16384</Id>
+			<Message LcId="1033">{0}: {1}</Message>
+		</Event>
+		<Event>
+			<Id>16385</Id>
+			<Message LcId="1033">{0}: {1} Connection Open (IN:{2} OUT:{3} API:{4}ms) from {5}.{6}.{7}.{8} successful</Message>
+		</Event>
+		<Event>
+			<Id>16386</Id>
+			<Message LcId="1033">{0}: {1} Connection Close (IN:{2} OUT:{3}) from {4}.{5}.{6}.{7} successful</Message>
+		</Event>
+		<Event>
+			<Id>16387</Id>
+			<Message LcId="1033">{0}: {1} Connection (IN:{2} OUT:{3}) with {4}.{5}.{6}.{7} timed out</Message>
+		</Event>
+		<Event>
+			<Id>16388</Id>
+			<Message LcId="1033">{0}: {1} Connection Open (IN:{2} OUT:{3}) from {4}.{5}.{6}.{7} denied (Error: {8})</Message>
+		</Event>
+		<Event>
+			<Id>16389</Id>
+			<Message LcId="1033">{0}: {1} Connection Open (IN:{2} OUT:{3}) from {4}.{5}.{6}.{7} denied (Input Data Size expected: {8} Byte(s) received: {9} Byte(s))</Message>
+		</Event>
+		<Event>
+			<Id>16390</Id>
+			<Message LcId="1033">{0}: {1} Connection Open (IN:{2} OUT:{3}) from {4}.{5}.{6}.{7} denied (Output Data Size expected: {8} Byte(s) received: {9} Byte(s))</Message>
+		</Event>
+		<Event>
+			<Id>16391</Id>
+			<Message LcId="1033"><![CDATA[{0}: {1} Connection Open (IN:{2} OUT:{3}) from {4}.{5}.{6}.{7} denied (RPI:{8}ms not supported -> API:{9}ms)]]></Message>
+		</Event>
+		<Event>
+			<Id>16392</Id>
+			<Message LcId="1033">{0}: {1} Connection Close (IN:{2} OUT:{3}) from {4}.{5}.{6}.{7} denied (Error: {8})</Message>
+		</Event>
+		<Event>
+			<Id>32768</Id>
+			<Message LcId="1033">{0}: {1}</Message>
+		</Event>
+		<Event>
+			<Id>32769</Id>
+			<Message LcId="1033">{0}: Connection with {1}.{2}.{3}.{4} ({5}) established</Message>
+		</Event>
+		<Event>
+			<Id>32770</Id>
+			<Message LcId="1033">{0}: Connection with {1}.{2}.{3}.{4} ({5}) timed out</Message>
+		</Event>
+		<Event>
+			<Id>32771</Id>
+			<Message LcId="1033">{0}: FwdOpen-Request sent to {1}.{2}.{3}.{4} ({5})</Message>
+		</Event>
+		<Event>
+			<Id>32772</Id>
+			<Message LcId="1033">{0}: Unsuccessful FwdOpen-Response received from {1}.{2}.{3}.{4} ({5}) (Error: {6})</Message>
+		</Event>
+		<Event>
+			<Id>32773</Id>
+			<Message LcId="1033">{0}: FwdClose-Request sent to {1}.{2}.{3}.{4} ({5})</Message>
+		</Event>
+		<Event>
+			<Id>32774</Id>
+			<Message LcId="1033">{0}: Unsuccessful FwdClose-Response received from {1}.{2}.{3}.{4} ({5}) (Error: {6})</Message>
+		</Event>
+		<Event>
+			<Id>32775</Id>
+			<Message LcId="1033">{0}: Connection with {1}.{2}.{3}.{4} ({5}) closed</Message>
+		</Event>
+		<Property>
+			<Name>DisplayTxtId</Name>
+			<Value>true</Value>
+		</Property>
+	</Source>
+</TcEventSources>

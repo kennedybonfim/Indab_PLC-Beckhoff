@@ -1,0 +1,921 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="Servos" Id="{bba950f5-3bda-427a-b0ed-ed67b6aa67c4}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Servos
+VAR
+	DelayTeste				: TON;
+	
+	VetorPosicaoX	: ARRAY[0..15] OF LREAL;
+	VetorPosicaoY	: ARRAY[0..15] OF LREAL;
+	
+	Delay_BtReferenciarServoX 	: TON;
+	Delay_BtReferenciarServoY 	: TON;
+	
+	ServoX_Referenciar			: BOOL;
+	ServoY_Referenciar			: BOOL;
+	
+	ServoX_ReferenciarAuto		: BOOL;
+	ServoY_ReferenciarAuto		: BOOL;
+	
+(*==========================		POWER		==========================*)	
+
+	EixoX_Power 			: MC_Power;	
+	EixoX_Power_Busy		: BOOL;
+	EixoX_Power_Active		: BOOL;
+	EixoX_Power_Error		: BOOL;
+	EixoX_Power_ErrorID		: UDINT;
+	
+	EixoY_Power 			: MC_Power;	
+	EixoY_Power_Busy		: BOOL;
+	EixoY_Power_Active		: BOOL;
+	EixoY_Power_Error		: BOOL;
+	EixoY_Power_ErrorID		: UDINT;
+
+(*========================================================================*)
+
+(*==========================		RESET		==========================*)	
+
+	EixoX_Reset 			: MC_Reset;
+	EixoX_Reset_Done		: BOOL;	
+	EixoX_Reset_Busy		: BOOL;
+	EixoX_Reset_Error		: BOOL;
+	EixoX_Reset_ErrorID		: UDINT;
+	
+	EixoY_Reset 			: MC_Reset;
+	EixoY_Reset_Done		: BOOL;	
+	EixoY_Reset_Busy		: BOOL;
+	Eixoy_Reset_Error		: BOOL;
+	EixoY_Reset_ErrorID		: UDINT;
+
+(*========================================================================*)
+
+(*==========================		HOME		==========================*)	
+
+	EixoX_Home 						: MC_Home;
+	EixoX_Home_Done					: BOOL;	
+	EixoX_Home_CommandAborted		: BOOL;
+	EixoX_Home_Error				: BOOL;
+	EixoX_Home_ErrorID				: UDINT;
+	
+	HomingMode     					: MC_HomingMode;
+	
+	EixoY_Home 						: MC_Home;
+	EixoY_Home_Done					: BOOL;	
+	EixoY_Home_CommandAborted		: BOOL;
+	EixoY_Home_Error				: BOOL;
+	EixoY_Home_ErrorID				: UDINT;
+
+(*========================================================================*)
+
+(*======================		MOVE ABSOLUTE		======================*)	
+
+	EixoX_MoveAbsHome					: MC_MoveAbsolute;
+	EixoX_MoveAbsHome_Done				: BOOL;	
+	EixoX_MoveAbsHome_CommandAborted	: BOOL;
+	EixoX_MoveAbsHome_Error				: BOOL;
+	EixoX_MoveAbsHome_ErrorID			: UDINT;
+	
+	EixoY_MoveAbsHome					: MC_MoveAbsolute;
+	EixoY_MoveAbsHome_Done				: BOOL;	
+	EixoY_MoveAbsHome_CommandAborted	: BOOL;
+	EixoY_MoveAbsHome_Error				: BOOL;
+	EixoY_MoveAbsHome_ErrorID			: UDINT;
+
+	EixoX_MoveAbsolute 					: MC_MoveAbsolute;
+	EixoX_MoveAbsolute_Done				: BOOL;	
+	EixoX_MoveAbsolute_CommandAborted	: BOOL;
+	EixoX_MoveAbsolute_Error			: BOOL;
+	EixoX_MoveAbsolute_ErrorID			: UDINT;
+	
+	EixoY_MoveAbsolute			 		: MC_MoveAbsolute;
+	EixoY_MoveAbsolute_Done				: BOOL;	
+	EixoY_MoveAbsolute_CommandAborted	: BOOL;
+	EixoY_MoveAbsolute_Error			: BOOL;
+	EixoY_MoveAbsolute_ErrorID			: UDINT;
+
+(*========================================================================*)
+	
+(*=========================		MOVE JOG		==========================*)	
+
+	EixoX_MoveJog					: MC_Jog;
+	EixoY_MoveJog					: MC_Jog;
+	
+	EixoX_JogReferenciarAuto		: MC_Jog;
+	EixoY_JogReferenciarAuto		: MC_Jog;
+	
+(*========================================================================*)	
+
+(*======================		MOVE RELATIVE		======================*)	
+
+	EixoX_MoveRelative		: MC_MoveRelative;
+	EixoY_MoveRelative		: MC_MoveRelative;
+
+(*========================================================================*)
+
+(*=====================		MÁQUINA DE ESTADOS		======================*)	
+
+	PassoServosXY				: INT;
+	index						: INT;
+	PosicaoX					: LREAL;
+	PosicaoY					: LREAL;
+	
+	Flag_EixoX_PosicaoOK		: BOOL;
+	Flag_EixoY_PosicaoOK		: BOOL;
+	
+	PassoEixoXReferenciarAutoINICIO	: INT;
+	PassoEixoXReferenciarAutoFIM	: INT;
+	PassoEixoYReferenciarAutoINICIO	: INT;
+	PassoEixoYReferenciarAutoFIM	: INT;
+	
+	JogFwd_EixoX_ReferenciarAuto	: BOOL;
+	JogBwd_EixoX_ReferenciarAuto	: BOOL;
+
+	JogFwd_EixoY_ReferenciarAuto	: BOOL;
+	JogBwd_EixoY_ReferenciarAuto	: BOOL;
+
+(*========================================================================*)
+	
+	//Blocos de Controle Eixo X
+	PowerOnServoX		: BOOL;
+	ReferenciarServoX	: BOOL;
+	MoveHomeServoX		: BOOL;
+	ResetServoX			: BOOL;
+	JogFwdServoX		: BOOL;
+	JogBwdServoX		: BOOL;
+	
+	//Status Servo Eixo X
+	VelocidadeEixoX		: LREAL;
+	PosicaoEixoX		: LREAL;
+	TorqueEixoX			: LREAL;
+	
+	//Blocos de Controle Eixo Y
+	PowerOnServoY		: BOOL;
+	ReferenciarServoY	: BOOL;
+	MoveHomeServoY		: BOOL;
+	ResetServoY			: BOOL;
+	JogFwdServoY		: BOOL;
+	JogBwdServoY		: BOOL;
+	
+	//Status Servo Eixo X
+	VelocidadeEixoY		: LREAL;
+	PosicaoEixoY		: LREAL;
+	TorqueEixoY			: LREAL;
+	
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IhmEscr_ServoXY_VelocidadeManual := 5;
+
+(*=================		POWER - SERVOS EIXOS X E Y		==================*)
+
+(*======================		SERVO EIXO X		======================*)
+
+EixoX_Power_Busy 	:= EixoX_Power.Busy;
+EixoX_Power_Active 	:= EixoX_Power.Active;
+EixoX_Power_Error 	:= EixoX_Power.Error;
+EixoX_Power_ErrorID	:= EixoX_Power.ErrorID;
+
+IF (MaquinaModoManual AND NOT Alarmes.AlarmeGrave)THEN
+	EixoX_Power(Axis := EixoX,
+				Enable := IhmBt_ServoX_PowerOn,
+				Enable_Positive := IhmBt_ServoX_PowerOn,
+				Enable_Negative := IhmBt_ServoX_PowerOn,
+				Override := 100);
+ELSIF (NOT Alarmes.AlarmeGrave) THEN
+	EixoX_Power(Axis := EixoX,
+			Enable := TRUE,
+			Enable_Positive := TRUE,
+			Enable_Negative := TRUE,
+			Override := 100);
+ELSE
+	EixoX_Power(Axis := EixoX,
+			Enable := FALSE,
+			Enable_Positive := FALSE,
+			Enable_Negative := FALSE);
+END_IF
+				
+IF EixoX_Power.Status THEN
+	EixoX_Energizado := TRUE;
+ELSE
+	EixoX_Energizado := FALSE;
+END_IF
+
+(*======================		SERVO EIXO Y		======================*)
+
+EixoY_Power_Busy 	:= EixoY_Power.Busy;
+EixoY_Power_Active 	:= EixoY_Power.Active;
+EixoY_Power_Error 	:= EixoY_Power.Error;
+EixoY_Power_ErrorID	:= EixoY_Power.ErrorID;
+
+IF (MaquinaModoManual AND NOT Alarmes.AlarmeGrave)THEN
+	EixoY_Power(Axis := EixoY,
+				Enable := IhmBt_ServoY_PowerOn,
+				Enable_Positive := IhmBt_ServoY_PowerOn,
+				Enable_Negative := IhmBt_ServoY_PowerOn,
+				Override := 100);
+ELSIF (NOT Alarmes.AlarmeGrave) THEN
+	EixoY_Power(Axis := EixoY,
+			Enable := TRUE,
+			Enable_Positive := TRUE,
+			Enable_Negative := TRUE,
+			Override := 100);
+ELSE
+	EixoY_Power(Axis := EixoY,
+			Enable := FALSE,
+			Enable_Positive := FALSE,
+			Enable_Negative := FALSE);
+END_IF
+			
+IF EixoY_Power.Status THEN
+	EixoY_Energizado := TRUE;
+ELSE
+	EixoY_Energizado := FALSE;
+END_IF
+
+(*=================		RESET - SERVOS EIXOS X E Y		==================*)
+
+(*======================		SERVO EIXO X		======================*)
+
+EixoX_Reset_Done 	:= EixoX_Reset.Done;
+EixoX_Reset_Busy 	:= EixoX_Reset.Busy;
+EixoX_Reset_Error 	:= EixoX_Reset.Error;
+EixoX_Reset_ErrorID	:= EixoX_Reset.ErrorID;
+
+EixoX_Reset(Axis := EixoX, Execute := (IhmBt_ServoX_Reset OR Reset));
+
+(*======================		SERVO EIXO Y		======================*)
+
+EixoY_Reset_Done 	:= EixoY_Reset.Done;
+EixoY_Reset_Busy 	:= EixoY_Reset.Busy;
+EixoY_Reset_Error 	:= EixoY_Reset.Error;
+EixoY_Reset_ErrorID	:= EixoY_Reset.ErrorID;
+
+EixoY_Reset(Axis := EixoY, Execute := (IhmBt_ServoX_Reset OR Reset));
+
+(*=============		REFERENCIAR - SERVOS EIXOS X E Y		==============*)
+
+(*======================		SERVO EIXO X		======================*)
+
+EixoX_Home_Done 			:= EixoX_Home.Done;
+EixoX_Home_CommandAborted 	:= EixoX_Home.CommandAborted;
+EixoX_Home_Error 			:= EixoX_Home.Error;
+EixoX_Home_ErrorID			:= EixoX_Home.ErrorID;
+
+//Lógica para Delay ao pressionar o botão de referenciar
+	IF (IhmBt_ServoX_Referenciar) THEN
+		Delay_BtReferenciarServoX(IN := TRUE, PT := T#2S);
+		IF(Delay_BtReferenciarServoX.Q) THEN
+			ServoX_Referenciar := TRUE;
+		END_IF
+	ELSE
+		Delay_BtReferenciarServoX(IN := FALSE);
+		ServoX_Referenciar := FALSE;
+	END_IF
+
+EixoX_Home(Axis := EixoX, Position := 0, HomingMode := MC_Direct, Execute := ((ServoX_Referenciar AND MaquinaModoManual) OR ServoX_ReferenciarAuto));
+
+(*======================		SERVO EIXO Y		======================*)
+
+EixoY_Home_Done 			:= EixoY_Home.Done;
+EixoY_Home_CommandAborted 	:= EixoY_Home.CommandAborted;
+EixoY_Home_Error 			:= EixoY_Home.Error;
+EixoY_Home_ErrorID			:= EixoY_Home.ErrorID;
+
+//Lógica para Delay ao pressionar o botão de referenciar
+	IF (IhmBt_ServoY_Referenciar) THEN
+		Delay_BtReferenciarServoY(IN := TRUE, PT := T#2S);
+		IF(Delay_BtReferenciarServoY.Q) THEN
+			ServoY_Referenciar := TRUE;
+		END_IF
+	ELSE
+		Delay_BtReferenciarServoY(IN := FALSE);
+		ServoY_Referenciar := FALSE;
+	END_IF
+
+EixoY_Home(Axis := EixoY, Position := 0, HomingMode := MC_Direct, Execute := ((ServoY_Referenciar AND MaquinaModoManual) OR ServoY_ReferenciarAuto));
+
+(*=============		MOVE para HOME - SERVOS EIXOS X E Y		==============*)
+
+(*======================		SERVO EIXO X		======================*)
+
+EixoX_MoveAbsHome(	Axis := EixoX,
+					Execute := (IhmBt_ServoX_Home AND MaquinaModoManual),
+					Position := 0,
+					Velocity := IhmEscr_ServoXY_VelocidadeAuto
+					(*Direction := 2*));
+
+(*======================		SERVO EIXO Y		======================*)
+								
+EixoX_MoveAbsHome(	Axis := EixoY,
+					Execute := (IhmBt_ServoY_Home AND MaquinaModoManual),
+					Position := 0,
+					Velocity := IhmEscr_ServoXY_VelocidadeAuto
+					(*Direction := 2*));
+
+(*=================		MANUAL - SERVOS EIXOS X E Y		==================*)
+
+(*======================		SERVO EIXO X		======================*)
+
+EixoX_MoveJog(	Axis := EixoX,
+				JogForward := (IhmBt_ServoX_JogFwd AND MaquinaModoManual),
+				JogBackwards := (IhmBt_ServoX_JogBwd AND MaquinaModoManual),
+				Velocity := IhmEscr_ServoXY_VelocidadeManual,
+				Acceleration := 100,
+				Deceleration := 100);
+				
+(*======================		SERVO EIXO Y		======================*)
+								
+EixoY_MoveJog(	Axis := EixoY,
+				JogForward := (IhmBt_ServoY_JogFwd AND MaquinaModoManual),
+				JogBackwards := (IhmBt_ServoY_JogBwd AND MaquinaModoManual),
+				Velocity := IhmEscr_ServoXY_VelocidadeManual,
+				Acceleration := 100,
+				Deceleration := 100);
+
+(*=================		STATUS - SERVOS EIXOS X E Y		==================*)
+
+(*======================		SERVO EIXO X		======================*)
+
+IhmLeit_ServoX_Posicao		:= EixoX.NcToPlc.ActPos;
+IhmLeit_ServoX_Velocidade	:= EixoX.NcToPlc.ActVelo;
+IhmLeit_ServoX_Torque		:= EixoX.NcToPlc.ActTorque;
+
+(*======================		SERVO EIXO Y		======================*)
+
+IhmLeit_ServoY_Posicao		:= EixoY.NcToPlc.ActPos;
+IhmLeit_ServoY_Velocidade	:= EixoY.NcToPlc.ActVelo;
+IhmLeit_ServoY_Torque		:= EixoY.NcToPlc.ActTorque;
+
+(*=========		MANIVELA ELETRÔNICA - SERVOS EIXOS X E Y		==========*)
+
+
+
+(*=================		AUTOMÁTICO - SERVOS EIXOS X E Y		==============*)
+(*======================		Modo Automático		======================*)
+
+//Receita Teste
+
+PosicaoOrigemX := 20;
+PosicaoOrigemY := 31;
+
+VetorPosicaoX[0] := 20;
+VetorPosicaoY[0] := 31;
+
+VetorPosicaoX[1] := 59;
+VetorPosicaoY[1] := 15;
+
+//PosicaoOrigemX := TargetX[0];
+//PosicaoOrigemY := TargetY[0];
+
+//Condição de Bloqueio da Máquina de Estados - Servos XY
+IF (Alarmes.AlarmeGrave
+	//OR NOT Alarmes.AlarmeMedio
+	OR NOT MaquinaLigada
+	OR NOT MaquinaModoAuto
+	//OR NOT((ReguaPotenciometricaPosicao > ReguaPotenciometrica_Recuada_LI) AND (ReguaPotenciometricaPosicao < ReguaPotenciometrica_Recuada_LS))
+	) THEN
+	PassoServosXY := 1000;
+	Flag_ServosXY_Maquina := FALSE;
+	index := 0;
+	EixoX_MoveAbsolute(	Axis:= EixoX, Execute:= FALSE);
+	EixoY_MoveAbsolute(	Axis:= EixoY, Execute:= FALSE);
+	Flag_EixoX_PosicaoOK := FALSE;
+	Flag_EixoY_PosicaoOK := FALSE;
+	
+END_IF
+
+CASE PassoServosXY OF
+	
+	//Passo 0 - Inicialização	
+	0: PassoServosXY := 10;
+		
+	//Passo 10 - Condição para Iniciar a Rotina dos Servos XY
+	10: IF  (Flag_Maquina_ServosXY) THEN
+			Flag_Maquina_ServosXY := FALSE;
+			PassoServosXY := 20;
+		END_IF
+		
+	//Passo 20 - Soldar 
+	20:	IF (TRUE OR SoldaXY[index]) THEN
+			Flag_ServosXY_MaquinaSolda := TRUE;
+			PassoServosXY := 30;
+		ELSE
+			Flag_ServosXY_MaquinaSolda := FALSE;
+			PassoServosXY := 40;			
+		END_IF
+
+	//Passo 30 - Aguardar conclusão de Solda
+	30:	IF (Flag_MaquinaSolda_ServosXY) THEN
+			Flag_MaquinaSolda_ServosXY := FALSE;
+			PassoServosXY := 40;			
+		END_IF
+	
+	//Passo 40 - Validar Próximo Ponto (X,Y)
+	40: index := index + 1;
+		IF (index<=(NumPontosSolda-1)) THEN
+			PassoServosXY := 50;	
+		ELSE
+			index := 0;
+			PassoServosXY := 80;	
+		END_IF
+	
+	//Passo 50 - Carregar Posição Alvo - Servo X e Y 
+	50: PosicaoX := VetorPosicaoX[index];//TargetX[index];
+		PosicaoY := VetorPosicaoY[index];//TargetY[index];
+		PassoServosXY := 60;
+		
+	//Passo 60 - Movimentar Servo Eixos X e Y
+	//			aguardar conclusão do movimento
+	60: EixoX_MoveAbsolute(	Axis:= EixoX, 
+							Execute:= TRUE,
+							Position:= PosicaoX,
+							Velocity:= IhmEscr_ServoXY_VelocidadeAuto
+							//Acceleration:= 15000,
+							//Deceleration:= 15000
+							);			
+		IF (EixoX_MoveAbsolute.Done) THEN
+			Flag_EixoX_PosicaoOK := TRUE;
+		END_IF
+							
+		EixoY_MoveAbsolute(	Axis:= EixoY, 
+							Execute:= TRUE,
+							Position:= PosicaoY,
+							Velocity:= IhmEscr_ServoXY_VelocidadeAuto
+							//Acceleration:= 15000,
+							//Deceleration:= 15000
+							);
+		IF (EixoY_MoveAbsolute.Done) THEN
+			Flag_EixoY_PosicaoOK := TRUE;	
+		END_IF
+		
+		IF (Flag_EixoX_PosicaoOK AND Flag_EixoY_PosicaoOK) THEN
+			PassoServosXY := 70;	
+		END_IF
+		
+	//Passo 70 - Finalizar Movimentação - Servos X e Y
+	70: EixoX_MoveAbsolute(	Axis:= EixoX, Execute:= FALSE);
+		EixoY_MoveAbsolute(	Axis:= EixoY, Execute:= FALSE);
+		Flag_EixoX_PosicaoOK := FALSE;
+		Flag_EixoY_PosicaoOK := FALSE;
+		PassoServosXY := 75;
+		
+	//Passo 75 - Aguardar Delay de Teste
+	75: DelayTeste(IN:=TRUE,PT:=T#200MS);
+		IF DelayTeste.Q THEN
+			DelayTeste(IN:=FALSE);
+			PassoServosXY := 20;		
+		END_IF
+		
+	//Passo 80 - Movimentar Servos X e  para a Origem
+	//			e aguardar conclusão do movimento
+	80: EixoX_MoveAbsolute(	Axis := EixoX, 
+							Execute := TRUE,
+							Position := VetorPosicaoX[0],
+							Velocity := IhmEscr_ServoXY_VelocidadeAuto
+							//Acceleration:= 15000,
+							//Deceleration:= 15000
+							);
+		IF (EixoX_MoveAbsolute.Done) THEN
+			Flag_EixoX_PosicaoOK := TRUE;	
+		END_IF
+		
+		EixoY_MoveAbsolute(	Axis := EixoY, 
+							Execute := TRUE,
+							Position := VetorPosicaoY[0],
+							Velocity := IhmEscr_ServoXY_VelocidadeAuto
+							//Acceleration:= 15000,
+							//Deceleration:= 15000
+							);
+		IF (EixoY_MoveAbsolute.Done) THEN
+			Flag_EixoY_PosicaoOK := TRUE;	
+		END_IF
+		
+		IF (Flag_EixoX_PosicaoOK AND Flag_EixoY_PosicaoOK) THEN
+			PassoServosXY := 90;	
+		END_IF
+		
+	//Passo 90 - Finalizar Movimentação - Servos X e Y
+	90: EixoX_MoveAbsolute(	Axis:= EixoX, Execute:= FALSE);
+		EixoY_MoveAbsolute(	Axis:= EixoY, Execute:= FALSE);
+		Flag_EixoX_PosicaoOK := FALSE;
+		Flag_EixoY_PosicaoOK := FALSE;
+		PassoServosXY := 100;
+		
+	//Passo 100 - Sinalizar Conclusão da Rotina
+	100:	Flag_ServosXY_Maquina := TRUE;
+		PassoServosXY := 1000;
+
+	//Passo 1000 - Finalização
+	1000: PassoServosXY := 0;
+	
+END_CASE
+
+(*=================		REFERENCIAMENTO AUTOMÁTICO		==================*)
+
+(*======================		SERVO EIXO X		======================*)
+								
+EixoX_JogReferenciarAuto(	Axis := EixoX,
+							JogForward := (JogFwd_EixoX_ReferenciarAuto),
+							JogBackwards := (JogBwd_EixoX_ReferenciarAuto),
+							Velocity := 1,
+							Acceleration := 100,
+							Deceleration := 100);
+							
+//Condição de Bloqueio da Máquina de Estados - Referenciamento Auto (INICIO)
+IF (Alarmes.AlarmeGrave
+	OR MaquinaLigada
+	OR NOT MaquinaModoManual
+	OR NOT IhmBt_ServoX_ReferenciarAutoINICIO
+	OR	IhmBt_ServoX_ReferenciarAutoFIM
+	OR NOT IhmBt_ServoX_PowerOn
+	OR InFimCurso3
+	) THEN
+	PassoEixoXReferenciarAutoINICIO := 1000;
+	//JogFwd_EixoX_ReferenciarAuto := FALSE;
+	JogBwd_EixoX_ReferenciarAuto := FALSE;
+	//ServoX_ReferenciarAuto := FALSE;
+END_IF
+
+CASE PassoEixoXReferenciarAutoINICIO OF
+
+	//Passo 0 - Inicialização
+	0: PassoEixoXReferenciarAutoINICIO := 10;
+	
+	//Passo 10 - Condição para iniciar Rotina de Referenciamento Automático
+	10: IF (IhmBt_ServoX_ReferenciarAutoINICIO) THEN
+			PassoEixoXReferenciarAutoINICIO := 20;
+		END_IF
+		
+	//Passo 20 - Move Jog BWD - Referenciar 
+	20: JogBwd_EixoX_ReferenciarAuto := TRUE;
+		PassoEixoXReferenciarAutoINICIO := 30;
+
+	//Passo 30 - Aguardar Acionamento do Switch Fim de Curso
+	30: IF (InFimCurso3) THEN
+			JogBwd_EixoX_ReferenciarAuto := TRUE;
+			//ServoX_ReferenciarAuto := TRUE;
+			PassoEixoXReferenciarAutoINICIO := 40;
+		END_IF
+		
+	//Passo 40 - Sinalizar Conclusão da Rotina
+	40: IhmBt_ServoX_ReferenciarAutoINICIO := FALSE;
+		//ServoX_ReferenciarAuto := FALSE;
+		PassoEixoXReferenciarAutoINICIO := 1000;
+	
+	//Passo 1000 - Finalização
+	1000:	IhmBt_ServoX_ReferenciarAutoINICIO := FALSE;
+			PassoEixoXReferenciarAutoINICIO := 0;
+
+END_CASE
+
+//Condição de Bloqueio da Máquina de Estados - Referenciamento Auto (FIM)
+IF (Alarmes.AlarmeGrave
+	OR MaquinaLigada
+	OR NOT MaquinaModoManual
+	OR NOT IhmBt_ServoX_ReferenciarAutoFIM
+	OR IhmBt_ServoX_ReferenciarAutoINICIO
+	OR NOT IhmBt_ServoX_PowerOn
+	OR InFimCurso4
+	) THEN
+	PassoEixoXReferenciarAutoFIM := 1000;
+	JogFwd_EixoX_ReferenciarAuto := FALSE;
+	//JogBwd_EixoX_ReferenciarAuto := FALSE;
+	//ServoX_ReferenciarAuto := FALSE;
+END_IF
+
+CASE PassoEixoXReferenciarAutoFIM OF
+
+	//Passo 0 - Inicialização
+	0: PassoEixoXReferenciarAutoFIM := 10;
+	
+	//Passo 10 - Condição para iniciar Rotina de Referenciamento Automático
+	10: IF (IhmBt_ServoX_ReferenciarAutoFIM) THEN
+			PassoEixoXReferenciarAutoFIM := 20;
+		END_IF
+		
+	//Passo 20 - Move Jog FWD - Referenciar 
+	20: JogFwd_EixoX_ReferenciarAuto := TRUE;
+		PassoEixoXReferenciarAutoFIM := 30;
+
+	//Passo 30 - Aguardar Acionamento do Switch Fim de Curso
+	30: IF (InFimCurso4) THEN
+			JogFwd_EixoX_ReferenciarAuto := TRUE;
+			//ServoX_ReferenciarAuto := TRUE;
+			PassoEixoXReferenciarAutoFIM := 40;
+		END_IF
+		
+	//Passo 40 - Sinalizar Conclusão da Rotina
+	40: IhmBt_ServoX_ReferenciarAutoFIM := FALSE;
+		//ServoX_ReferenciarAuto := FALSE;
+		PassoEixoXReferenciarAutoFIM := 1000;
+	
+	//Passo 1000 - Finalização
+	1000:	IhmBt_ServoX_ReferenciarAutoFIM := FALSE;
+			PassoEixoXReferenciarAutoFIM := 0;
+
+END_CASE
+
+(*======================		SERVO EIXO Y		======================*)
+								
+EixoY_JogReferenciarAuto(	Axis := EixoY,
+							JogForward := (JogFwd_EixoY_ReferenciarAuto),
+							JogBackwards := (JogBwd_EixoY_ReferenciarAuto),
+							Velocity := 1,
+							Acceleration := 100,
+							Deceleration := 100);
+							
+//Condição de Bloqueio da Máquina de Estados - Referenciamento Auto (INICIO)
+IF (Alarmes.AlarmeGrave
+	OR MaquinaLigada
+	OR NOT MaquinaModoManual
+	OR NOT IhmBt_ServoY_ReferenciarAutoINICIO
+	OR IhmBt_ServoY_ReferenciarAutoFIM
+	OR NOT IhmBt_ServoY_PowerOn
+	OR InFimCurso1
+	) THEN
+	PassoEixoYReferenciarAutoINICIO := 1000;
+	//JogFwd_EixoY_ReferenciarAuto := FALSE;
+	JogBwd_EixoY_ReferenciarAuto := FALSE;
+	//ServoY_ReferenciarAuto := FALSE;
+END_IF
+
+CASE PassoEixoYReferenciarAutoINICIO OF
+
+	//Passo 0 - Inicialização
+	0: PassoEixoYReferenciarAutoINICIO := 10;
+	
+	//Passo 10 - Condição para iniciar Rotina de Referenciamento Automático
+	10: IF (IhmBt_ServoY_ReferenciarAutoINICIO) THEN
+			PassoEixoYReferenciarAutoINICIO := 20;
+		END_IF
+		
+	//Passo 20 - Move Jog BWD - Referenciar 
+	20: JogBwd_EixoY_ReferenciarAuto := TRUE;
+		PassoEixoYReferenciarAutoINICIO := 30;
+
+	//Passo 30 - Aguardar Acionamento do Switch Fim de Curso
+	30: IF (InFimCurso1) THEN
+			JogBwd_EixoY_ReferenciarAuto := TRUE;
+			//ServoY_ReferenciarAuto := TRUE;
+			PassoEixoYReferenciarAutoINICIO := 40;
+		END_IF
+		
+	//Passo 40 - Sinalizar Conclusão da Rotina
+	40: IhmBt_ServoY_ReferenciarAutoINICIO := FALSE;
+		//ServoY_ReferenciarAuto := FALSE;
+		PassoEixoYReferenciarAutoINICIO := 1000;
+	
+	//Passo 1000 - Finalização
+	1000:	IhmBt_ServoY_ReferenciarAutoINICIO := FALSE;
+			PassoEixoYReferenciarAutoINICIO := 0;
+
+END_CASE
+
+//Condição de Bloqueio da Máquina de Estados - Referenciamento Auto (FIM)
+IF (Alarmes.AlarmeGrave
+	OR MaquinaLigada
+	OR NOT MaquinaModoManual
+	OR NOT IhmBt_ServoY_ReferenciarAutoFIM
+	OR IhmBt_ServoY_ReferenciarAutoINICIO
+	OR NOT IhmBt_ServoY_PowerOn
+	OR InFimCurso2
+	) THEN
+	PassoEixoYReferenciarAutoFIM := 1000;
+	JogFwd_EixoY_ReferenciarAuto := FALSE;
+	//JogBwd_EixoY_ReferenciarAuto := FALSE;
+	//ServoY_ReferenciarAuto := FALSE;
+END_IF
+
+CASE PassoEixoYReferenciarAutoFIM OF
+
+	//Passo 0 - Inicialização
+	0: PassoEixoYReferenciarAutoFIM := 10;
+	
+	//Passo 10 - Condição para iniciar Rotina de Referenciamento Automático
+	10: IF (IhmBt_ServoY_ReferenciarAutoFIM) THEN
+			PassoEixoYReferenciarAutoFIM := 20;
+		END_IF
+		
+	//Passo 20 - Move Jog FWD - Referenciar 
+	20: JogBwd_EixoY_ReferenciarAuto := TRUE;
+		PassoEixoYReferenciarAutoFIM := 30;
+
+	//Passo 30 - Aguardar Acionamento do Switch Fim de Curso
+	30: IF (InFimCurso1) THEN
+			JogBwd_EixoY_ReferenciarAuto := TRUE;
+			//ServoY_ReferenciarAuto := TRUE;
+			PassoEixoYReferenciarAutoFIM := 40;
+		END_IF
+		
+	//Passo 40 - Sinalizar Conclusão da Rotina
+	40: IhmBt_ServoY_ReferenciarAutoFIM := FALSE;
+		//ServoY_ReferenciarAuto := FALSE;
+		PassoEixoYReferenciarAutoFIM := 1000;
+	
+	//Passo 1000 - Finalização
+	1000:	IhmBt_ServoY_ReferenciarAutoFIM := FALSE;
+			PassoEixoYReferenciarAutoFIM := 0;
+
+END_CASE
+
+(*========================================================================*)]]></ST>
+    </Implementation>
+    <LineIds Name="Servos">
+      <LineId Id="5026" Count="1" />
+      <LineId Id="261" Count="0" />
+      <LineId Id="1438" Count="0" />
+      <LineId Id="274" Count="0" />
+      <LineId Id="1439" Count="0" />
+      <LineId Id="275" Count="3" />
+      <LineId Id="1242" Count="0" />
+      <LineId Id="1272" Count="17" />
+      <LineId Id="213" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="182" Count="0" />
+      <LineId Id="184" Count="1" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="1441" Count="0" />
+      <LineId Id="1443" Count="0" />
+      <LineId Id="430" Count="5" />
+      <LineId Id="1290" Count="16" />
+      <LineId Id="440" Count="5" />
+      <LineId Id="428" Count="0" />
+      <LineId Id="281" Count="0" />
+      <LineId Id="339" Count="0" />
+      <LineId Id="1444" Count="1" />
+      <LineId Id="340" Count="6" />
+      <LineId Id="1446" Count="0" />
+      <LineId Id="1448" Count="0" />
+      <LineId Id="471" Count="5" />
+      <LineId Id="470" Count="0" />
+      <LineId Id="327" Count="1" />
+      <LineId Id="1449" Count="0" />
+      <LineId Id="1451" Count="0" />
+      <LineId Id="329" Count="4" />
+      <LineId Id="3669" Count="0" />
+      <LineId Id="3645" Count="1" />
+      <LineId Id="3656" Count="0" />
+      <LineId Id="3658" Count="3" />
+      <LineId Id="3666" Count="0" />
+      <LineId Id="3668" Count="0" />
+      <LineId Id="3648" Count="0" />
+      <LineId Id="334" Count="1" />
+      <LineId Id="1452" Count="1" />
+      <LineId Id="478" Count="4" />
+      <LineId Id="3670" Count="0" />
+      <LineId Id="3673" Count="8" />
+      <LineId Id="3672" Count="0" />
+      <LineId Id="483" Count="0" />
+      <LineId Id="477" Count="0" />
+      <LineId Id="1023" Count="1" />
+      <LineId Id="1455" Count="1" />
+      <LineId Id="1025" Count="1" />
+      <LineId Id="1069" Count="0" />
+      <LineId Id="1031" Count="0" />
+      <LineId Id="1059" Count="0" />
+      <LineId Id="1065" Count="0" />
+      <LineId Id="1457" Count="1" />
+      <LineId Id="1032" Count="0" />
+      <LineId Id="1066" Count="0" />
+      <LineId Id="1070" Count="0" />
+      <LineId Id="1067" Count="1" />
+      <LineId Id="1039" Count="0" />
+      <LineId Id="349" Count="1" />
+      <LineId Id="1459" Count="0" />
+      <LineId Id="850" Count="0" />
+      <LineId Id="1460" Count="0" />
+      <LineId Id="361" Count="0" />
+      <LineId Id="388" Count="4" />
+      <LineId Id="1461" Count="1" />
+      <LineId Id="873" Count="0" />
+      <LineId Id="486" Count="5" />
+      <LineId Id="1103" Count="1" />
+      <LineId Id="1463" Count="0" />
+      <LineId Id="1105" Count="0" />
+      <LineId Id="1464" Count="0" />
+      <LineId Id="1106" Count="2" />
+      <LineId Id="1465" Count="0" />
+      <LineId Id="1110" Count="0" />
+      <LineId Id="1466" Count="0" />
+      <LineId Id="1111" Count="2" />
+      <LineId Id="1467" Count="0" />
+      <LineId Id="531" Count="0" />
+      <LineId Id="529" Count="0" />
+      <LineId Id="1470" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="2630" Count="0" />
+      <LineId Id="3326" Count="1" />
+      <LineId Id="5206" Count="0" />
+      <LineId Id="4176" Count="0" />
+      <LineId Id="4174" Count="0" />
+      <LineId Id="4173" Count="0" />
+      <LineId Id="3328" Count="0" />
+      <LineId Id="3330" Count="0" />
+      <LineId Id="3335" Count="0" />
+      <LineId Id="3333" Count="1" />
+      <LineId Id="5208" Count="2" />
+      <LineId Id="3325" Count="0" />
+      <LineId Id="2632" Count="4" />
+      <LineId Id="5025" Count="0" />
+      <LineId Id="2637" Count="1" />
+      <LineId Id="3849" Count="0" />
+      <LineId Id="3848" Count="0" />
+      <LineId Id="3481" Count="2" />
+      <LineId Id="3480" Count="0" />
+      <LineId Id="3644" Count="0" />
+      <LineId Id="2639" Count="1" />
+      <LineId Id="2908" Count="4" />
+      <LineId Id="3013" Count="3" />
+      <LineId Id="2918" Count="0" />
+      <LineId Id="3624" Count="0" />
+      <LineId Id="3626" Count="1" />
+      <LineId Id="5190" Count="0" />
+      <LineId Id="5200" Count="0" />
+      <LineId Id="5193" Count="0" />
+      <LineId Id="5195" Count="0" />
+      <LineId Id="5201" Count="0" />
+      <LineId Id="5191" Count="0" />
+      <LineId Id="5199" Count="0" />
+      <LineId Id="3630" Count="1" />
+      <LineId Id="4167" Count="0" />
+      <LineId Id="4172" Count="0" />
+      <LineId Id="3633" Count="0" />
+      <LineId Id="3635" Count="2" />
+      <LineId Id="3639" Count="4" />
+      <LineId Id="3625" Count="0" />
+      <LineId Id="3017" Count="2" />
+      <LineId Id="3021" Count="0" />
+      <LineId Id="2922" Count="6" />
+      <LineId Id="2931" Count="0" />
+      <LineId Id="3164" Count="1" />
+      <LineId Id="3336" Count="0" />
+      <LineId Id="2932" Count="6" />
+      <LineId Id="2941" Count="0" />
+      <LineId Id="3167" Count="0" />
+      <LineId Id="3166" Count="0" />
+      <LineId Id="3337" Count="0" />
+      <LineId Id="2942" Count="20" />
+      <LineId Id="3172" Count="0" />
+      <LineId Id="2973" Count="4" />
+      <LineId Id="2980" Count="0" />
+      <LineId Id="3170" Count="1" />
+      <LineId Id="3338" Count="0" />
+      <LineId Id="2981" Count="7" />
+      <LineId Id="3169" Count="0" />
+      <LineId Id="3168" Count="0" />
+      <LineId Id="3339" Count="0" />
+      <LineId Id="2991" Count="14" />
+      <LineId Id="3023" Count="1" />
+      <LineId Id="3008" Count="4" />
+      <LineId Id="2760" Count="0" />
+      <LineId Id="4326" Count="2" />
+      <LineId Id="4445" Count="13" />
+      <LineId Id="4856" Count="0" />
+      <LineId Id="4459" Count="4" />
+      <LineId Id="4504" Count="1" />
+      <LineId Id="4465" Count="32" />
+      <LineId Id="4669" Count="0" />
+      <LineId Id="4672" Count="4" />
+      <LineId Id="4857" Count="0" />
+      <LineId Id="4677" Count="38" />
+      <LineId Id="4670" Count="0" />
+      <LineId Id="4443" Count="0" />
+      <LineId Id="4329" Count="11" />
+      <LineId Id="4419" Count="0" />
+      <LineId Id="4430" Count="0" />
+      <LineId Id="4858" Count="0" />
+      <LineId Id="4431" Count="0" />
+      <LineId Id="4439" Count="0" />
+      <LineId Id="4341" Count="1" />
+      <LineId Id="4440" Count="0" />
+      <LineId Id="4503" Count="0" />
+      <LineId Id="4502" Count="0" />
+      <LineId Id="4345" Count="0" />
+      <LineId Id="4420" Count="0" />
+      <LineId Id="4346" Count="5" />
+      <LineId Id="4429" Count="0" />
+      <LineId Id="4353" Count="3" />
+      <LineId Id="4366" Count="0" />
+      <LineId Id="4421" Count="0" />
+      <LineId Id="4367" Count="1" />
+      <LineId Id="4375" Count="0" />
+      <LineId Id="4377" Count="0" />
+      <LineId Id="4433" Count="0" />
+      <LineId Id="4437" Count="0" />
+      <LineId Id="4378" Count="0" />
+      <LineId Id="4394" Count="1" />
+      <LineId Id="4400" Count="0" />
+      <LineId Id="4436" Count="0" />
+      <LineId Id="4438" Count="0" />
+      <LineId Id="4401" Count="2" />
+      <LineId Id="4442" Count="0" />
+      <LineId Id="4404" Count="1" />
+      <LineId Id="4718" Count="0" />
+      <LineId Id="4720" Count="4" />
+      <LineId Id="4859" Count="0" />
+      <LineId Id="4725" Count="39" />
+      <LineId Id="4406" Count="0" />
+      <LineId Id="4325" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,257 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="InterfaceIOs" Id="{b2ba1760-166e-448e-84ed-5c88a2b15e32}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM InterfaceIOs
+VAR
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*======================		ENTRADAS DIGITAIS		======================*)
+
+	//Cartão de Entradas 0:= EntradaI0_0
+	InMaquinaSolda_FK		:= EntradaI0_0;
+//	InPinoCalha				:= EntradaI0_1;
+//	InReset					:= EntradaI0_2;
+//	InVermelho				:= EntradaI0_3;
+//	InAmarelo				:= EntradaI0_4;
+//	InVerde					:= EntradaI0_5;
+//	InPecaOK				:= EntradaI0_6;
+//	InSolda					:= EntradaI0_7;
+	InFimCurso1				:= EntradaI1_0;
+	InFimCurso2				:= EntradaI1_1;
+	InFimCurso3				:= EntradaI1_2;
+	InFimCurso4				:= EntradaI1_3;
+//	InSensorIndutivo01		:= EntradaI1_4;
+//	InSensorIndutivo02		:= EntradaI1_5;
+//	InSensorIndutivo03		:= EntradaI1_6;
+//	InSensorIndutivo04		:= EntradaI1_7;
+	
+	//Cartão de Entradas 1
+//	InSensorIndutivo05		:= EntradaI2_0;
+//	InSensorIndutivo06		:= EntradaI2_1;
+	InSensorIndutivo07		:= EntradaI2_2;
+//	InSensorIndutivo08		:= EntradaI2_3;
+//	InSensorIndutivo09		:= EntradaI2_4;
+//	InSensorIndutivo10		:= EntradaI2_5;
+//	InSensorIndutivo11		:= EntradaI2_6;
+//	InSensorIndutivo12		:= EntradaI2_7;
+//	InComandoX				:= EntradaI3_0;
+//	InComandoY				:= EntradaI3_1;
+//	InComandoZ				:= EntradaI3_2;
+//	InComando4				:= EntradaI3_3;
+//	InComando5				:= EntradaI3_4;
+//	InComando6				:= EntradaI3_5;
+//	InComandoX1				:= EntradaI3_6;
+//	InComandoX10			:= EntradaI3_7;
+	
+	//Cartão de Entradas 2
+//	InComandoX100			:= EntradaI4_0;
+//	Reserva					:= EntradaI4_1;
+//	Reserva					:= EntradaI4_2;
+//	Reserva					:= EntradaI4_3;
+//	Reserva					:= EntradaI4_4;
+//	Reserva					:= EntradaI4_5;
+//	Reserva					:= EntradaI4_6;
+//	Reserva					:= EntradaI4_7;
+//	InSinalFaltaFase		:= EntradaI5_0;
+//	InComandoPedal			:= EntradaI5_1;
+	InSolicitaEntrada		:= EntradaI5_2;
+	InSolicitaReset			:= EntradaI5_3;
+//	Reserva					:= EntradaI5_4;
+//	Reserva					:= EntradaI5_5;
+//	Reserva					:= EntradaI5_6;
+//	Reserva					:= EntradaI5_7;
+	
+	//Cartão de Entradas 3
+	InPressostatoGeral		:= EntradaI6_0;
+	InSensorSegValvY7		:= EntradaI6_1;
+	InSensorSegValvY8		:= EntradaI6_2;
+//	InPeçaGarraRobo			:= EntradaI6_3;
+//	Reserva					:= EntradaI6_4;
+//	Reserva					:= EntradaI6_5;
+//	Reserva					:= EntradaI6_6;
+//	Reserva					:= EntradaI6_7;
+//	Reserva					:= EntradaI7_0;
+//	Reserva					:= EntradaI7_1;
+//	Reserva					:= EntradaI7_2;
+//	Reserva					:= EntradaI7_3;
+//	Reserva					:= EntradaI7_4;
+//	Reserva					:= EntradaI7_5;
+//	Reserva					:= EntradaI7_6;
+//	Reserva					:= EntradaI7_7;
+		
+(*============================================================================*)
+
+(*=========================		SAÍDAS DIGITAIS		==========================*)
+	//Outputs
+	
+	//Cartão de Saídas 0
+	SaidaQ0_0				:= OutLigarMesaIndex;
+	SaidaQ0_1				:= OutSentidoGiroMesaIndex;
+	SaidaQ0_2				:= OutLigarEsteiraSaida;
+	SaidaQ0_3				:= OutSentidoGiroEsteiraSaida;
+	SaidaQ0_4				:= OutMaquinaSolda_BtReset;
+	SaidaQ0_5				:= OutMaquinaSolda_BtStart;
+//	SaidaQ0_6				:= OutMaquinaSolda_BtReserva;
+	SaidaQ0_7				:= OutMaquinaSolda_Receita_Bit1;
+	SaidaQ1_0				:= OutMaquinaSolda_Receita_Bit2;
+	SaidaQ1_1				:= OutMaquinaSolda_Receita_Bit3;
+	SaidaQ1_2				:= OutMaquinaSolda_Receita_Bit4;
+	SaidaQ1_3				:= OutMaquinaSolda_Receita_Bit5;
+//	SaidaQ1_4				:= OutMaquinaSolda_Reserva;
+//	SaidaQ1_5				:= OutMaquinaSolda_Reserva;
+//	SaidaQ1_6				:= OutMaquinaSolda_Reserva;
+	SaidaQ1_7				:= OutValvulaY1A;
+	
+	//Cartão de Saídas 1
+	SaidaQ2_0				:= OutValvulaY1R;
+//	SaidaQ2_1				:= OutValvulaY2A;
+//	SaidaQ2_2				:= OutValvulaY2R;
+//	SaidaQ2_3				:= OutValvulaY3A;
+//	SaidaQ2_4				:= OutValvulaY3R;
+//	SaidaQ2_5				:= OutValvulaY4A;
+//	SaidaQ2_6				:= OutValvulaY4R;
+	SaidaQ2_7				:= OutValvulaY5A;
+	SaidaQ3_0				:= OutValvulaY5R;
+	SaidaQ3_1				:= OutValvulaY6;
+	SaidaQ3_2				:= OutValvulaY7;
+	SaidaQ3_3				:= OutValvulaY8;
+	SaidaQ3_4				:= OutValvulaY9;
+//	SaidaQ3_5				:= OutSinalizadorComandoLigado;
+	SaidaQ3_6				:= OutSinalizadorBotoeiraHS1;
+	SaidaQ3_7				:= OutSinalizadorBotoeiraHS2;
+	
+	//Cartão de Saídas 2
+	//SaidaQ4_0				:= ;
+	//SaidaQ4_1				:= ;
+	//SaidaQ4_2				:= ;
+	//SaidaQ4_3				:= ;
+	//SaidaQ4_4				:= ;
+	//SaidaQ4_5				:= ;
+	//SaidaQ4_6				:= ;
+	//SaidaQ4_7				:= ;
+	//SaidaQ5_0				:= ;
+	//SaidaQ5_1				:= ;
+	//SaidaQ5_2				:= ;
+	//SaidaQ5_3				:= ;
+	//SaidaQ5_4				:= ;
+	//SaidaQ5_5				:= ;
+	//SaidaQ5_6				:= ;
+	//SaidaQ5_7				:= ;
+	
+	//Cartão de Saídas 3
+	//SaidaQ6_0				:= ;
+	//SaidaQ6_1				:= ;
+	//SaidaQ6_2				:= ;
+	//SaidaQ6_3				:= ;
+	//SaidaQ6_4				:= ;
+	//SaidaQ6_5				:= ;
+	//SaidaQ6_6				:= ;
+	//SaidaQ6_7				:= ;
+	//SaidaQ7_0				:= ;
+	//SaidaQ7_1				:= ;
+	//SaidaQ7_2				:= ;
+	//SaidaQ7_3				:= ;
+	//SaidaQ7_4				:= ;
+	//SaidaQ7_5				:= ;
+	//SaidaQ7_6				:= ;
+	//SaidaQ7_7				:= ;
+
+(*============================================================================*)
+
+(*======================		ENTRADAS ANALÓGICAS		======================*)	
+	
+	ReguaPotenciometricaSinal	:= EntradaA0_0;
+	//							:= EntradaA0_1;
+	//							:= EntradaA0_2;
+	//							:= EntradaA0_3;
+	
+(*============================================================================*)
+
+(*======================		SAÍDAS ANALÓGICAS		======================*)
+
+	SaidaA0_0				:= REAL_TO_INT(ValvulaProporcional);
+	SaidaA0_1				:= REAL_TO_INT(FrequenciaMesaIndex);
+	SaidaA0_2				:= REAL_TO_INT(FrequenciaEsteiraSaida);
+//	SaidaA0_2				:= ;
+
+(*============================================================================*)
+
+(*==========================		SAFETY PLC		==========================*)	
+
+	InSafety_CortinaLuz					:= SafetyPLC_In_Byte0.0;
+	InSafety_BtEmergenciaMaquinaSolda	:= SafetyPLC_In_Byte0.2;
+	InSafety_BtEmergenciaChiller		:= SafetyPLC_In_Byte1.4;
+	InSafety_BtEmergenciaRobo			:= SafetyPLC_In_Byte1.6;
+	InSafety_BtEmergenciaFrontal		:= SafetyPLC_In_Byte2.0;
+	InSafety_ChPortaMaquinaSolda		:= SafetyPLC_In_Byte0.4;
+	InSafety_ChPortaPainelPrincipal		:= SafetyPLC_In_Byte0.6;
+	InSafety_ChPortaEsteira				:= SafetyPLC_In_Byte1.0;
+	InSafety_ChPortaCamera				:= SafetyPLC_In_Byte1.2;
+	InSafety_ChPortaFrontalInferior		:= SafetyPLC_In_Byte2.2;
+	InSafety_ChPortaLateralEsquerdaFD	:= SafetyPLC_In_Byte2.4;
+	InSafety_ChPortaLateralEsquerdaFE	:= SafetyPLC_In_Byte2.6;
+	
+	OutSafety_LiberacaoSDV1				:= SafetyPLC_In_Byte3.0;
+	OutSafety_ComandoSDV1				:= SafetyPLC_In_Byte3.1;
+	OutSafety_LiberacaoSDV2				:= SafetyPLC_In_Byte3.2;
+	OutSafety_ComandoSDV2				:= SafetyPLC_In_Byte3.3;
+	OutSafety_ComandoINVMesaIndex		:= SafetyPLC_In_Byte4.0;
+	OutSafety_ComandoINVEsteiraSaida	:= SafetyPLC_In_Byte4.1;
+	OutSafety_Comando1Robo				:= SafetyPLC_In_Byte4.2;
+	OutSafety_Comando2Robo				:= SafetyPLC_In_Byte4.3;
+	OutSafety_ParadaMaquinaSolda		:= SafetyPLC_In_Byte5.0;
+	OutSafety_SinalizacaoEmergencia		:= SafetyPLC_In_Byte5.1;
+	OutSafety_Reserva1					:= SafetyPLC_In_Byte5.2;
+	OutSafety_Reserva2					:= SafetyPLC_In_Byte5.3;
+	
+	SafetyPLC_Out_Byte0.0				:= Reset;//OutSafety_BtReset;
+	
+(*============================================================================*)]]></ST>
+    </Implementation>
+    <LineIds Name="InterfaceIOs">
+      <LineId Id="6" Count="9" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="16" Count="7" />
+      <LineId Id="25" Count="55" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="81" Count="3" />
+      <LineId Id="203" Count="0" />
+      <LineId Id="86" Count="2" />
+      <LineId Id="90" Count="10" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="101" Count="22" />
+      <LineId Id="160" Count="3" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="165" Count="6" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="174" Count="14" />
+      <LineId Id="154" Count="0" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="252" Count="1" />
+      <LineId Id="155" Count="0" />
+      <LineId Id="250" Count="0" />
+      <LineId Id="256" Count="3" />
+      <LineId Id="251" Count="0" />
+      <LineId Id="247" Count="1" />
+      <LineId Id="192" Count="0" />
+      <LineId Id="195" Count="0" />
+      <LineId Id="197" Count="0" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="196" Count="0" />
+      <LineId Id="199" Count="0" />
+      <LineId Id="194" Count="0" />
+      <LineId Id="191" Count="0" />
+      <LineId Id="207" Count="1" />
+      <LineId Id="210" Count="0" />
+      <LineId Id="225" Count="0" />
+      <LineId Id="211" Count="10" />
+      <LineId Id="232" Count="0" />
+      <LineId Id="234" Count="10" />
+      <LineId Id="233" Count="0" />
+      <LineId Id="222" Count="2" />
+      <LineId Id="206" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

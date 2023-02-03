@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="Sinalizadores" Id="{1137fa02-b690-41e0-825d-52a952bb0634}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Sinalizadores
+VAR
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*=================		SINALIZADORES LUMINOSOS		======================*)	
+
+//Comando Ligado
+IF (TRUE) THEN
+	OutSinalizadorComandoLigado := TRUE;
+ELSE
+	OutSinalizadorComandoLigado := FALSE;
+END_IF
+
+//Botoeira HS1
+IF (TRUE) THEN
+	OutSinalizadorBotoeiraHS1 := TRUE;
+ELSE
+	OutSinalizadorBotoeiraHS1 := FALSE;
+END_IF
+
+//Botoeira HS2
+IF (TRUE) THEN
+	OutSinalizadorBotoeiraHS2 := TRUE;
+ELSE
+	OutSinalizadorBotoeiraHS2 := FALSE;
+END_IF
+
+(*========================================================================*)]]></ST>
+    </Implementation>
+    <LineIds Name="Sinalizadores">
+      <LineId Id="174" Count="4" />
+      <LineId Id="180" Count="1" />
+      <LineId Id="183" Count="4" />
+      <LineId Id="189" Count="1" />
+      <LineId Id="192" Count="4" />
+      <LineId Id="198" Count="1" />
+      <LineId Id="201" Count="1" />
+      <LineId Id="124" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

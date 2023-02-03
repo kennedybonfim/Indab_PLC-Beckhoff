@@ -1,0 +1,312 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="Alarmes" Id="{8783aac5-a9e9-4f28-bf07-7e001d1f9e85}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Alarmes
+VAR
+
+(*==========================		ALARMES		==========================*)
+	TestBit							: BOOL;
+
+	ByteAlarmeEmergencia			: BYTE;
+	ByteAlarmeAberturaPortas		: BYTE;
+	ByteAlarmePainelPneumatico		: BYTE;
+	ByteAlarmeServoMotor			: BYTE;
+	
+	//AlarmeCortinaLuz				: BOOL;
+	AlarmeEmergencia				: BOOL;
+	AlarmeAberturaPortas			: BOOL;
+	AlarmePainelPneumatico			: BOOL;
+	AlarmeServoMotor				: BOOL;
+	
+	AlarmeGrave						: BOOL;
+	AlarmeMedio						: BOOL;
+	AlarmeLeve						: BOOL;
+
+(*========================================================================*)
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*==========================		ALARMES		==========================*)
+
+(*=====================		RESUMO DOS ALARMES		======================*)
+
+IF (AlarmeEmergencia) THEN
+	AlarmeGrave := TRUE;
+ELSE
+	AlarmeGrave := FALSE;
+END_IF
+
+IF (AlarmeAberturaPortas) THEN
+	AlarmeMedio := TRUE;
+ELSE
+	AlarmeMedio := FALSE;
+END_IF
+
+IF (FALSE) THEN
+	AlarmeLeve := TRUE;
+ELSE
+	AlarmeLeve := FALSE;
+END_IF
+
+(*========================================================================*) 
+
+(*=================		ALARMES DE CORTINA DE LUZ		==================*)
+
+//Alarme de Cortina de Luz
+//IF (NOT InSafety_CortinaLuz) THEN
+//	AlarmeCortinaLuz := TRUE;
+//ELSIF (InSafety_CortinaLuz AND Reset) THEN
+//	AlarmeCortinaLuz := FALSE;
+//END_IF
+
+(*========================================================================*) 
+
+(*==================		ALARMES DE EMERGÊNCIA		==================*)
+
+//Resumo do Byte
+IF (ByteAlarmeEmergencia > 0) THEN
+	AlarmeEmergencia := TRUE;
+ELSE
+	AlarmeEmergencia := FALSE;
+END_IF
+
+//Bit 0 - Botão de Emergência Frontal
+IF (NOT InSafety_BtEmergenciaFrontal) THEN
+	ByteAlarmeEmergencia.0 := TRUE;
+ELSIF (InSafety_BtEmergenciaFrontal AND Reset) THEN
+	ByteAlarmeEmergencia.0 := FALSE;
+END_IF
+
+//Bit 1 - Botão de Emergência do Chiller
+IF (NOT InSafety_BtEmergenciaChiller) THEN
+	ByteAlarmeEmergencia.1 := TRUE;
+ELSIF (InSafety_BtEmergenciaChiller AND Reset) THEN
+	ByteAlarmeEmergencia.1 := FALSE;
+END_IF
+
+//Bit 2 - Botão de Emergência da Porta Maq. Solda
+IF (NOT InSafety_BtEmergenciaMaquinaSolda) THEN
+	ByteAlarmeEmergencia.2 := TRUE;
+ELSIF (InSafety_BtEmergenciaMaquinaSolda AND Reset) THEN
+	ByteAlarmeEmergencia.2 := FALSE;
+END_IF
+
+//Bit 3 - Botão de Emergência do Robô
+IF (NOT InSafety_BtEmergenciaRobo) THEN
+	ByteAlarmeEmergencia.3	:= TRUE;
+ELSIF (InSafety_BtEmergenciaRobo AND Reset) THEN
+	ByteAlarmeEmergencia.3 := FALSE;
+END_IF
+
+(*========================================================================*) 
+
+(*==================	ALARMES DE ABETURA DE PORTAS		==============*)
+
+//Resumo do Byte
+IF (ByteAlarmeAberturaPortas > 0) THEN
+	AlarmeAberturaPortas := TRUE;
+ELSE
+	AlarmeAberturaPortas := FALSE;
+END_IF
+
+//Bit 0 - Abertura da Porta Frontal Inferior
+IF (NOT InSafety_ChPortaFrontalInferior) THEN
+	ByteAlarmeAberturaPortas.0 := TRUE;
+ELSIF (InSafety_ChPortaFrontalInferior AND Reset) THEN
+	ByteAlarmeAberturaPortas.0 := FALSE;
+END_IF
+
+//Bit 1 - Abertura da Porta da Câmera
+IF (NOT InSafety_ChPortaCamera) THEN
+	ByteAlarmeAberturaPortas.1 := TRUE;
+ELSIF (InSafety_ChPortaCamera AND Reset) THEN
+	ByteAlarmeAberturaPortas.1 := FALSE;
+END_IF
+
+//Bit 2 - Abertura da Porta da Esteira
+IF (NOT InSafety_ChPortaEsteira) THEN
+	ByteAlarmeAberturaPortas.2 := TRUE;
+ELSIF (InSafety_ChPortaEsteira AND Reset) THEN
+	ByteAlarmeAberturaPortas.2 := FALSE;
+END_IF
+
+//Bit 3 - Abertura da Porta Lateral Esquerda - Folha Direita
+IF (NOT InSafety_ChPortaLateralEsquerdaFD) THEN
+	ByteAlarmeAberturaPortas.3 := TRUE;
+ELSIF (InSafety_ChPortaLateralEsquerdaFD AND Reset) THEN
+	ByteAlarmeAberturaPortas.3 := FALSE;
+END_IF
+
+//Bit 4 - Abertura da Porta Lateral Esquerda - Folha Esquerda
+IF (NOT InSafety_ChPortaLateralEsquerdaFE) THEN
+	ByteAlarmeAberturaPortas.4 := TRUE;
+ELSIF (InSafety_ChPortaLateralEsquerdaFE AND Reset) THEN
+	ByteAlarmeAberturaPortas.4 := FALSE;
+END_IF
+
+//Bit 5 - Abertura da Porta da Máquina de Solda / Robô
+IF (NOT InSafety_ChPortaMaquinaSolda) THEN
+	ByteAlarmeAberturaPortas.5 := TRUE;
+ELSIF (InSafety_ChPortaMaquinaSolda AND Reset) THEN
+	ByteAlarmeAberturaPortas.5 := FALSE;
+END_IF
+
+//Bit 6 - Abertura da Porta do Painel Principal
+IF (NOT InSafety_ChPortaPainelPrincipal) THEN
+	ByteAlarmeAberturaPortas.6 := TRUE;
+ELSIF (InSafety_ChPortaPainelPrincipal AND Reset) THEN
+	ByteAlarmeAberturaPortas.6 := FALSE;
+END_IF
+
+(*========================================================================*) 
+
+(*=================		ALARMES PAINEL PNEUMÁTICO		==================*)
+
+//Resumo do Byte
+IF (ByteAlarmePainelPneumatico > 0) THEN
+	AlarmePainelPneumatico := TRUE;
+ELSE
+	AlarmePainelPneumatico := FALSE;
+END_IF
+
+//Bit 0 - Pressostato Geral (Digital)
+IF (NOT InPressostatoGeral) THEN
+	ByteAlarmePainelPneumatico.0 := TRUE;
+	IhmVs_PressaoPainelPneumatico_Text	:= "Alarme de Pressão";
+ELSIF (InPressostatoGeral AND Reset) THEN
+	ByteAlarmePainelPneumatico.0 := FALSE;
+	IhmVs_PressaoPainelPneumatico_Text	:= "Pressão Normal";
+END_IF
+
+//Bit 1 - Sensor Indutivo Válvula de Segurança V7
+IF (InSensorSegValvY7) THEN
+	ByteAlarmePainelPneumatico.1 := TRUE;
+ELSIF (NOT InSensorSegValvY7 AND Reset) THEN
+	ByteAlarmePainelPneumatico.1 := FALSE;
+END_IF
+
+//Bit 2 - Sensor Indutivo Válvula de Segurança V8
+IF (InSensorSegValvY8) THEN
+	ByteAlarmePainelPneumatico.2 := TRUE;
+ELSIF (NOT InSensorSegValvY8 AND Reset) THEN
+	ByteAlarmePainelPneumatico.2 := FALSE;
+END_IF
+
+(*========================================================================*)
+
+(*=================		ALARMES SERVO MOTORES X E Y		==================*)
+
+//Resumo do Byte
+IF (ByteAlarmeServoMotor > 0) THEN
+	AlarmeServoMotor := TRUE;
+ELSE
+	AlarmeServoMotor := FALSE;
+END_IF
+
+//Bit 0 - 
+IF (NOT InPressostatoGeral) THEN
+	ByteAlarmePainelPneumatico.0 := TRUE;
+ELSIF (InPressostatoGeral AND Reset) THEN
+	ByteAlarmePainelPneumatico.0 := FALSE;
+END_IF
+(*========================================================================*) ]]></ST>
+    </Implementation>
+    <LineIds Name="Alarmes">
+      <LineId Id="6" Count="0" />
+      <LineId Id="149" Count="1" />
+      <LineId Id="152" Count="0" />
+      <LineId Id="163" Count="0" />
+      <LineId Id="287" Count="0" />
+      <LineId Id="196" Count="1" />
+      <LineId Id="195" Count="0" />
+      <LineId Id="199" Count="5" />
+      <LineId Id="198" Count="0" />
+      <LineId Id="208" Count="3" />
+      <LineId Id="207" Count="0" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="151" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="116" Count="4" />
+      <LineId Id="237" Count="1" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="142" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="42" Count="2" />
+      <LineId Id="165" Count="1" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="36" Count="1" />
+      <LineId Id="167" Count="1" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="169" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="171" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="174" Count="0" />
+      <LineId Id="173" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="54" Count="5" />
+      <LineId Id="175" Count="1" />
+      <LineId Id="60" Count="4" />
+      <LineId Id="178" Count="0" />
+      <LineId Id="177" Count="0" />
+      <LineId Id="65" Count="1" />
+      <LineId Id="85" Count="2" />
+      <LineId Id="179" Count="1" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="89" Count="3" />
+      <LineId Id="182" Count="0" />
+      <LineId Id="181" Count="0" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="94" Count="3" />
+      <LineId Id="184" Count="0" />
+      <LineId Id="183" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="99" Count="3" />
+      <LineId Id="186" Count="0" />
+      <LineId Id="185" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="104" Count="3" />
+      <LineId Id="188" Count="0" />
+      <LineId Id="187" Count="0" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="109" Count="3" />
+      <LineId Id="190" Count="0" />
+      <LineId Id="189" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="240" Count="12" />
+      <LineId Id="351" Count="0" />
+      <LineId Id="254" Count="1" />
+      <LineId Id="352" Count="0" />
+      <LineId Id="256" Count="8" />
+      <LineId Id="282" Count="4" />
+      <LineId Id="277" Count="1" />
+      <LineId Id="239" Count="0" />
+      <LineId Id="311" Count="15" />
+      <LineId Id="310" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

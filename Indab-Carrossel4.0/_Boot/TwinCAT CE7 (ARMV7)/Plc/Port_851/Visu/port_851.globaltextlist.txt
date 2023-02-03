@@ -1,0 +1,549 @@
+Id;Default
+2346; STATUS %s 
+2796; STATUS %s $"
+2282;%
+582;% Cilindro
+2657;% Válvula Proporcional
+2893;%.2F
+4433;%.2f %
+1907;%.2f mm
+4611;%.2f mm/s
+742;%.2f s
+2952;%1.2f %
+1098;%1.2f mm/s
+1576;%1.2f s
+50;%d
+2982;%d %
+3579;%d 5
+1770;%d Hz
+1788;%d kgf
+1253;%d kgfm
+4006;%d m
+2537;%d mm
+3937;%d mm/s
+150;%d Peças
+1343;%d RPM
+1397;%d s
+1299;%s
+2396;%s 
+1289;%s mm
+2879;%s s
+798;%t[dd/MM/yyyy]
+720;%t[HH:mm:ss]
+219;(mm)
+3796;(Sensor Fim de Curso)
+3320;(Válvula Y1)
+2536;1 mm/s
+2851;1° Ponto - (X,Y)
+573;1° Ponto - X
+2310;1° Ponto - Y
+441;2 - Entrada Digital 2
+1114;2 - Entrada Digital 50
+182;2° Ponto - (X,Y)
+599;2° Ponto - X
+1505;2° Ponto - Y
+1844;3° Ponto - (X,Y)
+622;3° Ponto - X
+1502;3° Ponto - Y
+132;49 - Entrada Digital 1
+2798;4° Ponto - (X,Y)
+810;4° Ponto - X
+283;50 - Entrada Digital 2
+1649;5° Ponto - (X,Y)
+2974;5° Ponto - X
+1148;6° Ponto - X
+2872;Abertura da Porta da Câmera
+1259;Abertura da Porta da Esteira
+288;Abertura da Porta da Máquina de Solda / Robô
+521;Abertura da Porta do Painel Principal
+2773;Abertura da Porta Frontal Inferior
+2479;Abertura da Porta Lateral Esquerda - Folha Direita
+636;Abertura da Porta Lateral Esquerda - Folha Esquerda
+2720;Abrir
+740;Admin
+550;Administrador: %s
+597;Ajustes - Câmera
+2048;Ajustes - Inversores
+3983;Ajustes - Servos
+366;ALARMES
+3308;ALARMES - Configurações
+1463;ALARMES - PAINEL PNEUMÁTICO
+793;ALARMES DE ABERTURA DE PORTAS
+188;ALARMES DE EMERGÊNCIA
+908;AO1 - Saida Analogica 1
+838;AO1 - Saida Analogica 2
+524;AO1 - Saida Analogica 3
+1706;AO1 - Saida Analogica 4
+2466;Bloco de Válvulas
+3692;Botão de Emergência da Porta M/áq. Solda
+2330;Botão de Emergência da Porta Maq. Solda
+4548;Botão de Emergência da Porta Máq. Solda
+529;Botão de Emergência do Chiller
+2903;Botão de Emergência do Robô
+4578;Botão de Emergência Frontal
+4374;CAIXA
+4134;CALIBRAR
+338;Calibrar Avanço
+819;Calibrar Porca
+4743;Calibrar Recuo
+1497;Camera Sick Inspector
+1826;CANCELA
+1667;CANCELAR
+2511;CHANGE JOG
+1973;COMANDOS
+2850;COND. INICIAIS
+816;Conexão Ethernet/IP
+1413;Controle Manual:
+1838;Create Recipe
+2650;CÂMERA
+3559;Delay (ERROR):
+4227;Delay (Parada)
+1168;DELETAR
+2254;delete
+51;DESCARTE
+3936;Deslocar 1 Posição
+834;dgdfg
+299;Dispositivos Safety
+2227;Editar
+2382;EDITAR
+2487;Editar Receita
+385;EL1809 - Cartão 16 Entradas Digitais
+2710;ELEMENTOS PNEUMÁTICOS
+1312;Excluir
+358;Excluir Receita
+1921;Excluir Receita  Selecionada
+1853;Excluir Receita Selecionada
+1280;Excluir ReceitaSelecionada
+857;Executando Job (Job ID):
+828;EXECUTAR
+158;Executar Receita
+892;F01
+3241;F02
+2098;F03
+4267;F04
+2725;F05
+3970;FERRAMENTA
+1076;FIM DE CURSO
+436;Foto
+2367;Frequência (Esteira):
+803;Frequência (Mesa):
+340;FX3 - XTIO84002 - 8 entradas e 4 Saídas
+379;Garra do Robô
+228;HOME
+540;I1 - Entrada Digital 1
+545;I1 - Entrada Digital 1 - Botão de Emergencia 
+1767;I1 - Entrada Digital 1 - Sensor Atuador Rec
+603;I1 - Entrada Digital 10
+913;I1 - Entrada Digital 11
+997;I1 - Entrada Digital 12
+635;I1 - Entrada Digital 13
+26;I1 - Entrada Digital 14
+113;I1 - Entrada Digital 15
+734;I1 - Entrada Digital 16
+203;I1 - Entrada Digital 17
+531;I1 - Entrada Digital 2
+668;I1 - Entrada Digital 3
+528;I1 - Entrada Digital 31
+310;I1 - Entrada Digital 33
+480;I1 - Entrada Digital 4
+869;I1 - Entrada Digital 49
+383;I1 - Entrada Digital 5
+858;I1 - Entrada Digital 6
+789;I1 - Entrada Digital 7
+925;I1 - Entrada Digital 8
+578;I1 - Entrada Digital 9
+650;I1 - Entrada Rapida 1
+1222;I1 - Saida Digital 1
+753;I1-I2 - Botão de Emergência
+2080;I1-I2 - Cortina de Luz
+999;I1-I2 - Sensor Porta
+905;I10 - Entrada Digital 10
+160;I10 - Entrada Digital 26
+506;I10 - Entrada Digital 42
+171;I10 - Entrada Digital 58
+281;I10 - Saida Digital 10
+505;I11 - Entrada Digital 11
+631;I11 - Entrada Digital 27
+374;I11 - Entrada Digital 43
+69;I11 - Entrada Digital 59
+396;I11 - Saida Digital 11
+481;I12 - Entrada Digital 12
+5;I12 - Entrada Digital 28
+558;I12 - Entrada Digital 44
+408;I12 - Entrada Digital 60
+895;I12 - Saida Digital 12
+885;I13 - Entrada Digital 13
+710;I13 - Entrada Digital 29
+911;I13 - Entrada Digital 45
+177;I13 - Entrada Digital 61
+689;I13 - Saida Digital 13
+36;I14 - Entrada Digital 14
+735;I14 - Entrada Digital 30
+81;I14 - Entrada Digital 46
+926;I14 - Entrada Digital 62
+560;I14 - Saida Digital 14
+99;I15 - Entrada Digital 15
+463;I15 - Entrada Digital 31
+713;I15 - Entrada Digital 47
+921;I15 - Entrada Digital 63
+1398;I15 - Saida Digital 15
+361;I16 - Entrada Digital 16
+115;I16 - Entrada Digital 32
+693;I16 - Entrada Digital 48
+180;I16 - Entrada Digital 64
+418;I16 - Saida Digital 16
+372;I17 - Entrada Digital 1
+701;I18 - Entrada Digital 2
+287;I19 - Entrada Digital 3
+995;I2 - Entrada Digital 18
+730;I2 - Entrada Digital 2
+1430;I2 - Entrada Digital 31
+63;I2 - Entrada Digital 34
+339;I2 - Entrada Digital 50
+1472;I2 - Entrada Rapida 2
+470;I2 - Saida Digital 2
+804;I20 - Entrada Digital 4
+258;I21 - Entrada Digital 5
+269;I22 - Entrada Digital 6
+443;I23 - Entrada Digital 7
+448;I24 - Entrada Digital 8
+476;I25 - Entrada Digital 9
+373;I26 - Entrada Digital 10
+353;I27 - Entrada Digital 11
+821;I28 - Entrada Digital 12
+571;I29 - Entrada Digital 13
+184;I3 - Entrada Digital 19
+971;I3 - Entrada Digital 3
+538;I3 - Entrada Digital 35
+886;I3 - Entrada Digital 51
+935;I3 - Saida Digital 3
+163;I3-I4 - Botão de Emergência
+2387;I3-I4 - Sensor Porta
+771;I30 - Entrada Digital 14
+584;I31 - Entrada Digital 15
+31;I32 - Entrada Digital 16
+806;I33 - Entrada Digital 1
+811;I34 - Entrada Digital 2
+833;I35 - Entrada Digital 3
+645;I36 - Entrada Digital 4
+256;I37 - Entrada Digital 5
+382;I38 - Entrada Digital 6
+799;I39 - Entrada Digital 7
+390;I4 - Entrada Digital 20
+298;I4 - Entrada Digital 36
+437;I4 - Entrada Digital 4
+739;I4 - Entrada Digital 52
+149;I4 - Saida Digital 4
+572;I40 - Entrada Digital 8
+918;I41 - Entrada Digital 9
+654;I42 - Entrada Digital 10
+28;I43 - Entrada Digital 11
+74;I44 - Entrada Digital 12
+633;I45 - Entrada Digital 13
+34;I46 - Entrada Digital 14
+916;I47 - Entrada Digital 15
+49;I48 - Entrada Digital 16
+7;I49 - Entrada Digital 1
+934;I5 - Entrada Digital 21
+413;I5 - Entrada Digital 37
+318;I5 - Entrada Digital 5
+342;I5 - Entrada Digital 53
+286;I5 - Saida Digital 5
+755;I51 - Entrada Digital 3
+902;I52 - Entrada Digital 4
+321;I53 - Entrada Digital 5
+144;I54 - Entrada Digital 6
+945;I6 - Entrada Digital 22
+83;I6 - Entrada Digital 38
+225;I6 - Entrada Digital 54
+238;I6 - Entrada Digital 6
+688;I6 - Entrada Digital54
+87;I6 - Saida Digital 6
+402;I7 - Entrada Digital 23
+507;I7 - Entrada Digital 39
+823;I7 - Entrada Digital 55
+535;I7 - Entrada Digital 7
+344;I7 - Saida Digital 7
+162;I8 - Entrada Digital 24
+539;I8 - Entrada Digital 40
+859;I8 - Entrada Digital 56
+773;I8 - Entrada Digital 8
+1097;I8 - Saida Digital 8
+170;I9 - Entrada Digital 25
+812;I9 - Entrada Digital 41
+1133;I9 - Entrada Digital 57
+485;I9 - Entrada Digital 9
+1096;I9 - Saida Digital 9
+5145;ID
+2239;ID: %d
+4583;ID: %s
+3757;INICIO CURSO
+1135;INICIO DE CURSO
+2585;Inv. Esteira
+2998;Inv. Mesa
+1439;Inversor Esteira
+1539;Inversor Mesa
+4459;INÍCIO DE CURSO
+127;Job Completed:
+3080;Job ID: %s
+2980;Job Result:
+1782;JOG
+1089;kjhfg
+2787;Liga/Desliga
+1768;Load from file
+2469;LOGIN
+1255;login
+1329;Login
+14;logout
+1939;Logout
+557;MANUAL
+808;manutenção
+2820;MANUTENÇÃO
+2550;MARCELO
+1956;mm
+254;MODO AUTOMÁTICO
+4429;MODO: 
+4753;MODO: %s
+4355;Monitaramento
+1855;Monitoramento
+2574;MOTORES
+2424;MOTORES E CÂMERA
+1318;MOV. MANUAIS
+2535;MOVIMENTOS MANUAIS
+1082;mudar senha
+928;Mudar senha
+1268;Máquina de Solda
+2708;MÁQUINA DE SOLDA
+4465;No.
+2481;Nome da Receita: %s
+1532;Nome: %s
+809;None
+936;Nova Receita
+2159;N° Peças por Caixa
+29;Número de Fotos
+2956;Número de Pontos
+2113;Operator
+4168;OPERAÇÃO
+604;Operação
+1361;P01 - (X,Y)
+2292;P02 - (X,Y)
+826;P03 - (X,Y)
+3609;P04 - (X,Y)
+3644;P05 - (X,Y)
+3275;P06 - (X,Y
+3037;P06 - (X,Y)
+1504;P07 - (X,Y)
+1202;P08 - (X,Y
+1084;P08 - (X,Y)
+1549;P09 - (X,Y)
+746;P10 - (X,Y)
+1319;P11 - (X,Y)
+116;P12 - (X,Y)
+738;P13 - (X,Y)
+3363;P14 - (X,Y)
+2712;P15 - (X,Y)
+3015;P16 - (X,Y)
+906;P17 - (X,Y)
+322;P18 - (X,Y)
+2901;P19 - (X,Y)
+1216;P20 - (X,Y)
+570;PAUSE
+25;Pega do Robo - (X,Y
+933;Pega do Robo - (X,Y, Z)
+360;Pega do Robo - (X,Y,Z)
+2894;Pega do Robo - (X,YZ)
+2422;Pega do Robo - X
+85;Pega do Robo - Y
+835;PEGA PEÇA
+3889;Pos. Manual
+1324;POS. ZERO
+3752;Posição
+3255;Posições Fixas
+1402;POWER ON
+2624;Pressostato Geral (Digital)
+3890;PRESSÃO NORMAL
+89;PRODUÇÃO
+752;PROGRAMA 
+1650;PROGRAMA $"%s $"
+3334;PROGRAMA $"%s$"
+1522;PROGRAMA: $"%s $"
+1748;PROGRAMA: $"%S$"
+996;PROGRAMA: $"%s$"
+907;Q1 - Saida Digital 1
+846;Q1 - Saida Digital 17
+391;Q1 - Saida Digital 33
+1238;Q1 - Saida Digital 49
+665;Q1-Q2 - Botão de Emergência
+400;Q1-Q2 - Motor 
+1039;Q1-Q2 - Robo Yaskawa GP7
+239;Q1-Q2 - Servo 1
+552;Q10 - Saida Digital 10
+1257;Q10 - Saida Digital 26
+839;Q10 - Saida Digital 42
+304;Q10 - Saida Digital 58
+519;Q11 - Saida Digital 11
+375;Q11 - Saida Digital 27
+1059;Q11 - Saida Digital 43
+61;Q11 - Saida Digital 59
+1491;Q12 - Saida Digital 12
+111;Q12 - Saida Digital 28
+1499;Q12 - Saida Digital 44
+527;Q12 - Saida Digital 60
+467;Q13 - Saida Digital 13
+1058;Q13 - Saida Digital 29
+695;Q13 - Saida Digital 45
+736;Q13 - Saida Digital 61
+121;Q14 - Saida Digital 14
+1488;Q14 - Saida Digital 30
+877;Q14 - Saida Digital 46
+791;Q14 - Saida Digital 62
+1567;Q15 - Saida Digital 15
+369;Q15 - Saida Digital 31
+1242;Q15 - Saida Digital 47
+319;Q15 - Saida Digital 63
+1359;Q16 - Saida Digital 16
+682;Q16 - Saida Digital 32
+1401;Q16 - Saida Digital 48
+376;Q16 - Saida Digital 64
+1212;Q2 - Saida Digital 18
+870;Q2 - Saida Digital 2
+438;Q2 - Saida Digital 34
+556;Q2 - Saida Digital 50
+790;Q3 - Saida Digital 19
+1444;Q3 - Saida Digital 3
+722;Q3 - Saida Digital 35
+1060;Q3 - Saida Digital 51
+2293;Q3-Q4 - Botão de Emergência
+1544;Q3-Q4 - Motor
+1458;Q3-Q4 - Reserva
+1526;Q3-Q4 - Robo Yaskawa GP7
+1048;Q3-Q4 - Servo 2
+837;Q4 - Saida Digital 20
+246;Q4 - Saida Digital 36
+297;Q4 - Saida Digital 4
+1254;Q4 - Saida Digital 52
+982;Q5 - Saida Digital 21
+1712;Q5 - Saida Digital 37
+493;Q5 - Saida Digital 5
+1821;Q5 - Saida Digital 53
+187;Q6 - Saida Digital 22
+1438;Q6 - Saida Digital 38
+1586;Q6 - Saida Digital 54
+293;Q6 - Saida Digital 6
+1226;Q7 - Saida Digital 23
+516;Q7 - Saida Digital 39
+549;Q7 - Saida Digital 55
+883;Q7 - Saida Digital 7
+1151;Q8 - Saida Digital 24
+193;Q8 - Saida Digital 40
+1918;Q8 - Saida Digital 56
+847;Q8 - Saida Digital 8
+963;Q9 - Saida Digital 25
+1867;Q9 - Saida Digital 41
+215;Q9 - Saida Digital 57
+97;Q9 - Saida Digital 9
+1119;Read
+1874;receita
+2877;RECEITAS
+1575;REF. AUTO
+1914;REFERENCIAR
+3213;Reserva
+341;RESERVA
+2144;RESET
+1309;Revolução
+311;Robo Yaskawa GP7
+4381;ROBÔ
+3731;RÉGUA POTENCIOMÉTRICA
+337;s s
+240;Safety Sick Flexi Soft
+2485;Salvar
+2968;SALVAR
+1252;save
+2494;Selecionar Job (Job ID):
+4791;Selecionar Job:
+1271;Selecionar Receita
+3057;Sensor Indutivo Válvula de Segurança V7
+1331;Sensor Indutivo Válvula de Segurança V8
+488;Service
+147;SERVO ON
+663;Servo X
+1758;Servo Y
+88;SETUP FERR.
+2573;SETUP FERRAMENTA
+2925;Solda
+2161;START
+1635;Status Câmera
+1266;STOP
+2841;Tela de Manutenção
+3071;Tela de Rece
+2618;TELA DE RECEITA
+1837;Tela de Receitas
+30;TELA MANUTENÇÃO
+1963;TELA MENU
+1042;TELA MOVIMENTOS MANUAIS
+2878;TELA PRINCIPAL
+1776;TELA PRODUÇÃO
+634;TELA RECEITA
+2326;Tempo (Torque Máximo):
+2347;Tempo Ciclo Atual
+2652;Tempo Ciclo Atual: %d seg.
+1794;TEMPOS
+876;Term 2 - EL1809 - 16 Entradas Digitais
+326;Term 3 - EL1809 - 16 Entradas Digitais
+745;Term 4 - EL1809 - 16 Entradas Digitais
+836;Term 5 - EL1809 - 16 Entradas Digitais
+235;Term 6 - EL2809 - 16 Saídas Digitais
+1142;Term 7 - EL2809 - 16 Saídas Digitais
+937;Term 8 - EL2809 - 16 Saídas Digitais
+359;Term 9 - EL1252 - 2 Entradas Rápidas
+1021;Term 9 - EL2809 - 16 Saídas Digitais
+1647;Term 9 - EL3064 - 4 Entradas Analógicas
+1315;Term 9 - EL4004 - 4 Saídas Analógicas
+2044;TESTE
+3256;Tolerância (%):
+17;Torque Máximo:
+1330;Torque:
+2934;Total de Peças Aprovadas
+2195;Total de Peças BOAS
+2294;Total de Peças Produzida
+435;Total de Peças Produzidas
+1862;Total de Peças REFUGO
+2595;Total de Peças Reprovadas
+1409;TRIGGER
+1897;Usuário: %s
+1043;Velocidade
+363;Velocidade (Auto)
+2911;Velocidade (Auto):
+3254;Velocidade (Manual)
+1842;Velocidade (Manual):
+574;Velocidade Manual
+2412;Velocidade:
+1403;Válvula Proporcial
+2569;Válvula Proporcional
+1104;Válvula Y1
+3504;Válvula Y10
+241;Válvula Y11
+186;Válvula Y12
+875;Válvula Y2
+202;Válvula Y3
+2070;Válvula Y4
+1218;Válvula Y5
+3239;Válvula Y6
+2771;Válvula Y7
+3632;Válvula Y8
+1152;Válvula Y9
+1898;Válvulas de Segurança
+200;VÁLVULAS DE SEGURANÇA
+2889;wewerw
+605;write
+3482;x1
+4174;x10
+1179;x100
+616;XTIO[1] - 8 entradas e 4 Saídas
+100;XTIO[2] - 8 entradas e 4 Saídas
+114;XTIO[3] - 8 entradas e 4 Saídas
+92;Zerar Contador
+2498;ZERAR CONTADORES
+1733;± %1.2f %
+5146;± %d %
+4942;± %d Hz
